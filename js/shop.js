@@ -6,6 +6,26 @@ const Shop = {
     const data = await res.json();
     this.items = data.items || [];
     this.render();
+
+    const promoBtn = document.getElementById('promoBtn');
+    if (promoBtn) promoBtn.addEventListener('click', async () => {
+      const user = Store.getUser();
+      const code = document.getElementById('promoInput').value;
+      const res = await fetch('/api/promo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nick: user.nick, code })
+      });
+      const data2 = await res.json();
+      if (data2.success) {
+        Store.setUser(data2.user);
+        updateBalanceDisplay();
+        alert('🎟️ +' + data2.amount + '$ по промокоду!');
+        document.getElementById('promoInput').value = '';
+      } else {
+        alert(data2.error);
+      }
+    });
   },
 
   render() {
@@ -63,7 +83,6 @@ const Shop = {
 
     Store.setUser(data.user);
     updateBalanceDisplay();
-    // Если купили тему — надеваем
     const item = this.items.find(i => i.id === id);
     if (item && item.type === 'theme') this.equip(id);
     this.render();
