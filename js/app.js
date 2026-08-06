@@ -346,3 +346,32 @@ async function pingOnline() {
     if (el && data.online !== undefined) el.textContent = data.online;
   } catch (e) {}
 }
+
+// ===== ССЫЛКИ В ШАПКЕ =====
+function injectHeaderLinks() {
+  const right = document.querySelector('.header-right');
+  if (!right) return;
+  if (!document.getElementById('shopLink')) {
+    const a = document.createElement('a');
+    a.href = '/shop.html'; a.className = 'btn btn-ghost'; a.id = 'shopLink'; a.textContent = '🛒 Магазин';
+    right.insertBefore(a, right.firstChild);
+  }
+  const user = Store.getUser();
+  if (user && user.role === 'admin' && !document.getElementById('adminLink')) {
+    const a = document.createElement('a');
+    a.href = '/admin.html'; a.className = 'btn btn-ghost'; a.id = 'adminLink'; a.textContent = '👑 Админ';
+    right.insertBefore(a, right.firstChild);
+  }
+}
+
+// ===== ТЕМЫ =====
+function applyTheme() {
+  const theme = localStorage.getItem('seekazino_theme');
+  const user = Store.getUser();
+  const owned = user && user.inventory && user.inventory.includes(theme);
+  if (theme && owned) {
+    document.documentElement.setAttribute('data-theme', theme.replace('th_', ''));
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+  }
+}
