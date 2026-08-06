@@ -60,7 +60,7 @@ const LimboGame = {
     let shown;
     if (won) shown = this.target * (1 + Math.random() * 0.5);
     else shown = 1 + Math.random() * Math.max(this.target - 1, 0.1) * 0.95;
-    shown = Math.max(1.00, Math.round(shown * 100) / 100;
+    shown = Math.max(1.00, Math.round(shown * 100) / 100);
 
     el.textContent = shown.toFixed(2) + 'x';
     const winnings = won ? this.bet * this.target : 0;
