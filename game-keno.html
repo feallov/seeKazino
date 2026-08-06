@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>seeKazino — Keno</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <a href="index.html" class="logo"><span class="logo-icon">🎰</span><span>see<span class="logo-accent">Kazino</span></span></a>
+            <div class="header-right">
+                <div class="balance-pill"><span class="balance-icon">💰</span><span id="balanceAmount">$10.00</span></div>
+                <a href="index.html" class="btn btn-ghost">← В лобби</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main game-layout">
+        <div class="crash-display">
+            <div class="keno-grid" id="kenoGrid"></div>
+            <div class="crash-status" id="kenoStatus">Выбери от 1 до 10 чисел и жми "Играть"</div>
+        </div>
+
+        <div class="crash-controls">
+            <div class="bet-section">
+                <label class="form-label">Ставка</label>
+                <div class="bet-input-group">
+                    <button class="bet-adjust" id="betMinus">−</button>
+                    <input type="number" class="form-input bet-input" id="betAmount" value="1.00" min="0.10" step="0.10">
+                    <button class="bet-adjust" id="betPlus">+</button>
+                </div>
+            </div>
+
+            <div class="mines-info">
+                <div class="mines-info-row"><span>Выбрано:</span><span id="kenoPicked">0 / 10</span></div>
+                <div class="mines-info-row"><span>Совпало:</span><span id="kenoHits">0</span></div>
+                <div class="mines-info-row"><span>Множитель:</span><span id="kenoMult" class="text-green">0x</span></div>
+            </div>
+
+            <button class="btn btn-ghost btn-full" id="kenoClear">Очистить</button>
+            <button class="btn btn-primary btn-full btn-large" id="kenoPlay" style="margin-top:8px;">🔢 Играть</button>
+        </div>
+    </main>
+
+    <script src="js/keno.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
