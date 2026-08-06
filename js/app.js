@@ -1,55 +1,34 @@
-// ===== seeKazino App Logic (Server-side) =====
-
 const API = {
   async register(nick, password, avatar) {
     const res = await fetch('/api/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ nick, password, avatar })
     });
     return res.json();
   },
-
   async login(nick, password) {
     const res = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ nick, password })
     });
     return res.json();
   },
-
   async getUser(nick) {
     const res = await fetch(`/api/user?nick=${encodeURIComponent(nick)}`);
     return res.json();
   },
-
-  async updateStats(nick, bet, winAmount) {
+  async updateStats(nick, bet, winAmount, cashoutMultiplier) {
     const res = await fetch('/api/update-stats', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nick, bet, winAmount })
-    });
-    return res.json();
-  },
-
-  async updateBalance(nick, newBalance) {
-    const res = await fetch('/api/update-balance', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ nick, newBalance })
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nick, bet, winAmount, cashoutMultiplier })
     });
     return res.json();
   }
 };
 
 const Store = {
-  getNick() {
-    return localStorage.getItem('seekazino_nick');
-  },
-  setNick(nick) {
-    localStorage.setItem('seekazino_nick', nick);
-  },
+  getNick() { return localStorage.getItem('seekazino_nick'); },
+  setNick(nick) { localStorage.setItem('seekazino_nick', nick); },
   clearNick() {
     localStorage.removeItem('seekazino_nick');
     localStorage.removeItem('seekazino_user');
@@ -58,9 +37,7 @@ const Store = {
     const data = localStorage.getItem('seekazino_user');
     return data ? JSON.parse(data) : null;
   },
-  setUser(user) {
-    localStorage.setItem('seekazino_user', JSON.stringify(user));
-  },
+  setUser(user) { localStorage.setItem('seekazino_user', JSON.stringify(user)); },
   getBalance() {
     const user = this.getUser();
     return user ? user.balance : 10.00;
@@ -81,16 +58,29 @@ const Store = {
       this.setUser(data.user);
       updateBalanceDisplay();
       updateAuthDisplay();
-      initProfile();
     }
     return data.user;
   }
 };
 
+// ===== ПРОВЕРКА АВТОРИЗАЦИИ =====
+function requireAuth() {
+  if (!Store.getNick()) {
+    window.location.href = '/login.html';
+    return false;
+  }
+  return true;
+}
+
+function requireGuest() {
+  if (Store.getNick()) {
+    window.location.href = '/index.html';
+  }
+}
+
 function updateBalanceDisplay() {
   const balance = Store.getBalance();
-  const elements = document.querySelectorAll('#balanceAmount, #profileBalance');
-  elements.forEach(el => {
+  document.querySelectorAll('#balanceAmount, #profileBalance').forEach(el => {
     if (el) el.textContent = '$' + Number(balance).toFixed(2);
   });
 }
@@ -106,14 +96,20 @@ function updateAuthDisplay() {
     if (logoutBtn) logoutBtn.style.display = 'block';
     if (avatarBtn) {
       avatarBtn.textContent = user.avatar || '😎';
-      avatarBtn.href = 'profile.html';
+      avatarBtn.href = '/profile.html';
     }
   }
 }
 
+const PROTECTED_PAGES = ['index.html', 'profile.html', 'game-crash.html'];
+
 document.addEventListener('DOMContentLoaded', async () => {
-  // Если залогинен — подтягиваем свежие данные с сервера
-  if (Store.getNick()) {
+  const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+  
+  if (currentPage === 'login.html') {
+    requireGuest();
+  } else if (PROTECTED_PAGES.includes(currentPage)) {
+    if (!requireAuth()) return;
     await Store.refreshUser();
   }
   
@@ -123,7 +119,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   initProfile();
 });
 
-// ===== АВТОРИЗАЦИЯ =====
 function initAuth() {
   const tabs = document.querySelectorAll('.auth-tab');
   const loginForm = document.getElementById('loginForm');
@@ -133,7 +128,6 @@ function initAuth() {
     tab.addEventListener('click', () => {
       tabs.forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
-
       if (tab.dataset.tab === 'login') {
         loginForm.style.display = 'block';
         registerForm.style.display = 'none';
@@ -145,56 +139,41 @@ function initAuth() {
     });
   });
 
-  const avatarOptions = document.querySelectorAll('.avatar-option');
-  avatarOptions.forEach(opt => {
+  document.querySelectorAll('.avatar-option').forEach(opt => {
     opt.addEventListener('click', () => {
-      avatarOptions.forEach(o => o.classList.remove('selected'));
+      document.querySelectorAll('.avatar-option').forEach(o => o.classList.remove('selected'));
       opt.classList.add('selected');
     });
   });
 
-  // ВХОД
   if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const nick = document.getElementById('loginNick').value.trim();
       const pass = document.getElementById('loginPass').value;
-
       disableForm(loginForm, true);
       const data = await API.login(nick, pass);
       disableForm(loginForm, false);
-
-      if (!data.success) {
-        showError(data.error || 'Ошибка входа');
-        return;
-      }
-
+      if (!data.success) { showError(data.error || 'Ошибка входа'); return; }
       Store.setNick(nick);
       Store.setUser(data.user);
-      window.location.href = 'index.html';
+      window.location.href = '/index.html';
     });
   }
 
-  // РЕГИСТРАЦИЯ
   if (registerForm) {
     registerForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const nick = document.getElementById('regNick').value.trim();
       const pass = document.getElementById('regPass').value;
       const avatar = document.querySelector('.avatar-option.selected')?.dataset.avatar || '😎';
-
       disableForm(registerForm, true);
       const data = await API.register(nick, pass, avatar);
       disableForm(registerForm, false);
-
-      if (!data.success) {
-        showError(data.error || 'Ошибка регистрации');
-        return;
-      }
-
+      if (!data.success) { showError(data.error || 'Ошибка регистрации'); return; }
       Store.setNick(nick);
       Store.setUser(data.user);
-      window.location.href = 'index.html';
+      window.location.href = '/index.html';
     });
   }
 
@@ -202,23 +181,18 @@ function initAuth() {
   if (logoutBtn) {
     logoutBtn.addEventListener('click', () => {
       Store.clearNick();
-      window.location.href = 'index.html';
+      window.location.href = '/login.html';
     });
   }
 }
 
 function disableForm(form, disabled) {
-  form.querySelectorAll('button, input').forEach(el => {
-    el.disabled = disabled;
-  });
+  form.querySelectorAll('button, input').forEach(el => el.disabled = disabled);
 }
 
 function showError(msg) {
   const el = document.getElementById('authError');
-  if (el) {
-    el.textContent = msg;
-    el.style.display = 'block';
-  }
+  if (el) { el.textContent = msg; el.style.display = 'block'; }
 }
 
 function hideError() {
@@ -226,7 +200,16 @@ function hideError() {
   if (el) el.style.display = 'none';
 }
 
-// ===== ПРОФИЛЬ =====
+// ===== АЧИВКИ =====
+const ACHIEVEMENTS = {
+  first_win:   { icon: '🥇', name: 'Первая победа', desc: 'Выиграй первый раунд' },
+  streak_5:    { icon: '🔥', name: 'Серия x5', desc: '5 побед подряд' },
+  high_roller: { icon: '💎', name: 'Хайроллер', desc: 'Выиграй со ставки $50+' },
+  sharp_eye:   { icon: '🎯', name: 'Острый глаз', desc: 'Забери на множителе 5x+' },
+  whale:       { icon: '👑', name: 'Whale', desc: 'Накопи $1000+' },
+  speedrun:    { icon: '⚡', name: 'Спидран', desc: 'Забери в первые 2 секунды' }
+};
+
 function initProfile() {
   const user = Store.getUser();
   if (!user) return;
@@ -258,9 +241,7 @@ function initProfile() {
     xpBar.style.width = Math.min(progress, 100) + '%';
   }
   const xpText = document.getElementById('xpText');
-  if (xpText && nextLevel) {
-    xpText.textContent = user.xp + ' / ' + nextLevel.xp + ' XP';
-  }
+  if (xpText && nextLevel) xpText.textContent = user.xp + ' / ' + nextLevel.xp + ' XP';
 
   if (user.bets !== undefined) {
     setText('statBets', user.bets);
@@ -271,6 +252,63 @@ function initProfile() {
     setText('statProfit', (profit >= 0 ? '+$' : '-$') + Math.abs(profit).toFixed(2));
     setText('statBiggest', '$' + (user.biggestWin || 0).toFixed(2));
   }
+  
+  renderAchievements(user.achievements || []);
+}
+
+function renderAchievements(userAch) {
+  const container = document.getElementById('achievementsGrid');
+  if (!container) return;
+  container.innerHTML = '';
+  
+  Object.keys(ACHIEVEMENTS).forEach(id => {
+    const ach = ACHIEVEMENTS[id];
+    const unlocked = userAch.includes(id);
+    
+    const card = document.createElement('div');
+    card.className = 'achievement-card ' + (unlocked ? 'achievement-unlocked' : 'achievement-locked');
+    card.innerHTML = `
+      <span class="achievement-icon">${ach.icon}</span>
+      <span class="achievement-name">${ach.name}</span>
+      <span class="achievement-desc">${unlocked ? '✓ Получено' : ach.desc}</span>
+    `;
+    container.appendChild(card);
+  });
+}
+
+// Показывает попап при получении ачивки
+function showAchievementToast(id) {
+  const ach = ACHIEVEMENTS[id];
+  if (!ach) return;
+  
+  const toast = document.createElement('div');
+  toast.style.cssText = `
+    position: fixed; top: 80px; right: 20px; z-index: 1000;
+    background: linear-gradient(135deg, #1A4D3A, #22C55E);
+    color: white; padding: 16px 20px; border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(34,197,94,0.3);
+    animation: slideIn 0.3s ease-out;
+    font-family: inherit;
+  `;
+  toast.innerHTML = `
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span style="font-size:32px;">${ach.icon}</span>
+      <div>
+        <div style="font-size:11px; opacity:0.8; text-transform:uppercase;">Новое достижение</div>
+        <div style="font-weight:700;">${ach.name}</div>
+      </div>
+    </div>
+  `;
+  
+  const style = document.createElement('style');
+  style.textContent = `@keyframes slideIn { from { transform: translateX(400px); } to { transform: translateX(0); } }`;
+  document.head.appendChild(style);
+  document.body.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.style.animation = 'slideIn 0.3s ease-out reverse';
+    setTimeout(() => toast.remove(), 300);
+  }, 4000);
 }
 
 function setText(id, value) {
