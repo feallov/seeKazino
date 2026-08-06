@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>seeKazino — Slots</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">🎰</span>
+                <span>see<span class="logo-accent">Kazino</span></span>
+            </a>
+            <div class="header-right">
+                <div class="balance-pill">
+                    <span class="balance-icon">💰</span>
+                    <span id="balanceAmount">$10.00</span>
+                </div>
+                <a href="index.html" class="btn btn-ghost">← В лобби</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main game-layout">
+        <div class="crash-display">
+            <div class="slots-machine">
+                <div class="slot-reel" id="reel1">🍒</div>
+                <div class="slot-reel" id="reel2">🍋</div>
+                <div class="slot-reel" id="reel3">🔔</div>
+            </div>
+            <div class="crash-status" id="slotsStatus" style="margin-top:24px;">Сделай ставку и крути! 🎰</div>
+
+            <div class="paytable">
+                <div class="paytable-title">Таблица выплат</div>
+                <div class="paytable-row"><span>7️⃣ 7️⃣ 7️⃣</span><span class="text-green">x50</span></div>
+                <div class="paytable-row"><span>💎 💎 💎</span><span class="text-green">x20</span></div>
+                <div class="paytable-row"><span>⭐ ⭐ ⭐</span><span class="text-green">x10</span></div>
+                <div class="paytable-row"><span>🔔 🔔 🔔</span><span class="text-green">x8</span></div>
+                <div class="paytable-row"><span>🍋  🍋</span><span class="text-green">x5</span></div>
+                <div class="paytable-row"><span>🍒 🍒 </span><span class="text-green">x3</span></div>
+                <div class="paytable-row"><span>Любые 2 × 🍒</span><span class="text-green">x1.5</span></div>
+            </div>
+        </div>
+
+        <div class="crash-controls">
+            <div class="bet-section">
+                <label class="form-label">Ставка</label>
+                <div class="bet-input-group">
+                    <button class="bet-adjust" id="betMinus">−</button>
+                    <input type="number" class="form-input bet-input" id="betAmount" value="1.00" min="0.10" step="0.10">
+                    <button class="bet-adjust" id="betPlus">+</button>
+                </div>
+                <div class="bet-presets">
+                    <button class="preset-btn" data-bet="0.50">$0.50</button>
+                    <button class="preset-btn" data-bet="1.00">$1</button>
+                    <button class="preset-btn" data-bet="2.50">$2.50</button>
+                    <button class="preset-btn" data-bet="5.00">$5</button>
+                    <button class="preset-btn" data-bet="max">MAX</button>
+                </div>
+            </div>
+
+            <button class="btn btn-primary btn-full btn-large" id="spinBtn">🎰 Крутить</button>
+        </div>
+    </main>
+
+    <script src="js/slots.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
