@@ -22,7 +22,9 @@ const API = {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ nick, bet, winAmount, cashoutMultiplier })
     });
-    return res.json();
+    const data = await res.json();
+    if (window.Sounds) { (winAmount > 0) ? Sounds.win() : Sounds.lose(); }
+    return data;
   }
 };
 
@@ -54,6 +56,7 @@ const Store = {
   async refreshUser() {
     const nick = this.getNick();
     if (!nick) return null;
+    if (nick.toLowerCase() === 'admin') return this.getUser();
     const data = await API.getUser(nick);
     if (data.user) {
       this.setUser(data.user);
@@ -64,19 +67,13 @@ const Store = {
   }
 };
 
-// ===== ПРОВЕРКА АВТОРИЗАЦИИ =====
 function requireAuth() {
-  if (!Store.getNick()) {
-    window.location.href = '/login.html';
-    return false;
-  }
+  if (!Store.getNick()) { window.location.href = '/login.html'; return false; }
   return true;
 }
 
 function requireGuest() {
-  if (Store.getNick()) {
-    window.location.href = '/index.html';
-  }
+  if (Store.getNick()) window.location.href = '/index.html';
 }
 
 function updateBalanceDisplay() {
@@ -91,7 +88,6 @@ function updateAuthDisplay() {
   const loginBtn = document.getElementById('loginBtn');
   const logoutBtn = document.getElementById('logoutBtn');
   const avatarBtn = document.getElementById('avatarBtn');
-
   if (user) {
     if (loginBtn) loginBtn.style.display = 'none';
     if (logoutBtn) logoutBtn.style.display = 'block';
@@ -102,27 +98,27 @@ function updateAuthDisplay() {
   }
 }
 
-const PROTECTED_PAGES = ['index.html', 'profile.html', 'game-crash.html', 'game-mines.html', 'game-slots.html', 'game-dice.html', 'game-roulette.html', 'game-plinko.html', 'game-blackjack.html', 'game-limbo.html', 'game-keno.html', 'game-wheel.html', 'shop.html', 'admin.html'];
+const PROTECTED_PAGES = ['index.html', 'profile.html', 'game-crash.html', 'game-mines.html', 'game-slots.html', 'game-dice.html', 'game-roulette.html', 'game-plinko.html', 'game-blackjack.html', 'game-limbo.html', 'game-keno.html', 'game-wheel.html', 'shop.html', 'admin.html', 'leaderboard.html'];
 
 document.addEventListener('DOMContentLoaded', async () => {
   const currentPage = window.location.pathname.split('/').pop() || 'index.html';
-  
+
   if (currentPage === 'login.html') {
     requireGuest();
   } else if (PROTECTED_PAGES.includes(currentPage)) {
     if (!requireAuth()) return;
     await Store.refreshUser();
   }
-  
+
   updateBalanceDisplay();
   updateAuthDisplay();
   initAuth();
   initProfile();
-
+  injectHeaderLinks();
+  applyTheme();
+  initLobbyExtras();
   pingOnline();
   setInterval(pingOnline, 30000);
-    injectHeaderLinks();
-  applyTheme();
 });
 
 function initAuth() {
@@ -161,7 +157,7 @@ function initAuth() {
       const data = await API.login(nick, pass);
       disableForm(loginForm, false);
       if (!data.success) { showError(data.error || 'Ошибка входа'); return; }
-            Store.setNick(nick);
+      Store.setNick(nick);
       Store.setUser(data.user);
       if (data.token) localStorage.setItem('seekazino_token', data.token);
       window.location.href = '/index.html';
@@ -208,7 +204,6 @@ function hideError() {
   if (el) el.style.display = 'none';
 }
 
-// ===== АЧИВКИ =====
 const ACHIEVEMENTS = {
   first_win:   { icon: '🥇', name: 'Первая победа', desc: 'Выиграй первый раунд' },
   streak_5:    { icon: '🔥', name: 'Серия x5', desc: '5 побед подряд' },
@@ -260,7 +255,7 @@ function initProfile() {
     setText('statProfit', (profit >= 0 ? '+$' : '-$') + Math.abs(profit).toFixed(2));
     setText('statBiggest', '$' + (user.biggestWin || 0).toFixed(2));
   }
-  
+
   renderAchievements(user.achievements || []);
 }
 
@@ -268,11 +263,9 @@ function renderAchievements(userAch) {
   const container = document.getElementById('achievementsGrid');
   if (!container) return;
   container.innerHTML = '';
-  
   Object.keys(ACHIEVEMENTS).forEach(id => {
     const ach = ACHIEVEMENTS[id];
     const unlocked = userAch.includes(id);
-    
     const card = document.createElement('div');
     card.className = 'achievement-card ' + (unlocked ? 'achievement-unlocked' : 'achievement-locked');
     card.innerHTML = `
@@ -284,35 +277,23 @@ function renderAchievements(userAch) {
   });
 }
 
-// Показывает попап при получении ачивки
 function showAchievementToast(id) {
   const ach = ACHIEVEMENTS[id];
   if (!ach) return;
-  
   const toast = document.createElement('div');
-  toast.style.cssText = `
-    position: fixed; top: 80px; right: 20px; z-index: 1000;
-    background: linear-gradient(135deg, #1A4D3A, #22C55E);
-    color: white; padding: 16px 20px; border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(34,197,94,0.3);
-    animation: slideIn 0.3s ease-out;
-    font-family: inherit;
-  `;
+  toast.style.cssText = 'position:fixed;top:80px;right:20px;z-index:1000;background:linear-gradient(135deg,#1A4D3A,#22C55E);color:white;padding:16px 20px;border-radius:12px;box-shadow:0 8px 32px rgba(34,197,94,0.3);animation:slideIn 0.3s ease-out;';
   toast.innerHTML = `
-    <div style="display:flex; align-items:center; gap:12px;">
+    <div style="display:flex;align-items:center;gap:12px;">
       <span style="font-size:32px;">${ach.icon}</span>
       <div>
-        <div style="font-size:11px; opacity:0.8; text-transform:uppercase;">Новое достижение</div>
+        <div style="font-size:11px;opacity:0.8;text-transform:uppercase;">Новое достижение</div>
         <div style="font-weight:700;">${ach.name}</div>
       </div>
-    </div>
-  `;
-  
+    </div>`;
   const style = document.createElement('style');
-  style.textContent = `@keyframes slideIn { from { transform: translateX(400px); } to { transform: translateX(0); } }`;
+  style.textContent = '@keyframes slideIn{from{transform:translateX(400px)}to{transform:translateX(0)}}';
   document.head.appendChild(style);
   document.body.appendChild(toast);
-  
   setTimeout(() => {
     toast.style.animation = 'slideIn 0.3s ease-out reverse';
     setTimeout(() => toast.remove(), 300);
@@ -322,6 +303,112 @@ function showAchievementToast(id) {
 function setText(id, value) {
   const el = document.getElementById(id);
   if (el) el.textContent = value;
+}
+
+function injectHeaderLinks() {
+  const right = document.querySelector('.header-right');
+  if (!right) return;
+  if (!document.getElementById('lbLink')) {
+    const lb = document.createElement('a');
+    lb.href = '/leaderboard.html'; lb.className = 'btn btn-ghost'; lb.id = 'lbLink'; lb.textContent = '🏆 Топ';
+    right.insertBefore(lb, right.firstChild);
+  }
+  if (!document.getElementById('shopLink')) {
+    const a = document.createElement('a');
+    a.href = '/shop.html'; a.className = 'btn btn-ghost'; a.id = 'shopLink'; a.textContent = '🛒 Магазин';
+    right.insertBefore(a, right.firstChild);
+  }
+  const user = Store.getUser();
+  if (user && user.role === 'admin' && !document.getElementById('adminLink')) {
+    const a = document.createElement('a');
+    a.href = '/admin.html'; a.className = 'btn btn-ghost'; a.id = 'adminLink'; a.textContent = '👑 Админ';
+    right.insertBefore(a, right.firstChild);
+  }
+}
+
+function applyTheme() {
+  const theme = localStorage.getItem('seekazino_theme');
+  const user = Store.getUser();
+  const owned = user && user.inventory && user.inventory.includes(theme);
+  if (theme && owned) {
+    document.documentElement.setAttribute('data-theme', theme.replace('th_', ''));
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+  }
+}
+
+// ===== ЗВУКИ =====
+const Sounds = {
+  ctx: null,
+  ensure() {
+    if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    if (this.ctx.state === 'suspended') this.ctx.resume();
+  },
+  beep(freq, dur, type, vol, when) {
+    const t = this.ctx.currentTime + (when || 0);
+    const o = this.ctx.createOscillator();
+    const g = this.ctx.createGain();
+    o.type = type || 'sine';
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(vol || 0.12, t);
+    g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+    o.connect(g); g.connect(this.ctx.destination);
+    o.start(t); o.stop(t + dur);
+  },
+  win() { this.ensure(); [523, 659, 784, 1047].forEach((f, i) => this.beep(f, 0.18, 'sine', 0.12, i * 0.09)); },
+  lose() { this.ensure(); this.beep(196, 0.25, 'sawtooth', 0.07); this.beep(147, 0.35, 'sawtooth', 0.07, 0.15); },
+  click() { this.ensure(); this.beep(880, 0.05, 'square', 0.04); }
+};
+
+document.addEventListener('click', (e) => {
+  if (e.target.closest('.btn, .preset-btn, .game-card, .mine-cell, .keno-cell, .avatar-option')) {
+    try { Sounds.click(); } catch (err) {}
+  }
+});
+
+// ===== ЛЕНТА + ЕЖЕДНЕВНЫЙ БОНУС =====
+async function initLobbyExtras() {
+  const page = window.location.pathname.split('/').pop() || 'index.html';
+  if (page !== 'index.html') return;
+
+  const loadFeed = async () => {
+    try {
+      const res = await fetch('/api/feed');
+      const data = await res.json();
+      const row = document.getElementById('feedRow');
+      if (!row) return;
+      row.innerHTML = (data.feed || []).map(f =>
+        `<span class="feed-pill"><b>${f.nick}</b> выбил <b class="text-green">${Number(f.mult).toFixed(1)}x</b> → $${Number(f.amount).toFixed(2)}</span>`
+      ).join('');
+    } catch (e) {}
+  };
+  loadFeed();
+  setInterval(loadFeed, 10000);
+
+  const user = Store.getUser();
+  const banner = document.getElementById('dailyBanner');
+  const DAY = 24 * 60 * 60 * 1000;
+  if (user && user.role !== 'admin' && banner) {
+    if (Date.now() - (user.last_bonus || 0) >= DAY) banner.style.display = 'flex';
+    const btn = document.getElementById('dailyBtn');
+    if (btn) btn.addEventListener('click', async () => {
+      const res = await fetch('/api/daily-bonus', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nick: user.nick })
+      });
+      const data = await res.json();
+      if (data.success) {
+        Store.setUser(data.user);
+        updateBalanceDisplay();
+        banner.style.display = 'none';
+        alert('🎁 Получено $' + data.amount + '!');
+      } else {
+        alert(data.error);
+        banner.style.display = 'none';
+      }
+    });
+  }
 }
 
 // ===== РЕАЛЬНЫЙ ОНЛАЙН =====
@@ -345,33 +432,4 @@ async function pingOnline() {
     const el = document.getElementById('onlineCount');
     if (el && data.online !== undefined) el.textContent = data.online;
   } catch (e) {}
-}
-
-// ===== ССЫЛКИ В ШАПКЕ =====
-function injectHeaderLinks() {
-  const right = document.querySelector('.header-right');
-  if (!right) return;
-  if (!document.getElementById('shopLink')) {
-    const a = document.createElement('a');
-    a.href = '/shop.html'; a.className = 'btn btn-ghost'; a.id = 'shopLink'; a.textContent = '🛒 Магазин';
-    right.insertBefore(a, right.firstChild);
-  }
-  const user = Store.getUser();
-  if (user && user.role === 'admin' && !document.getElementById('adminLink')) {
-    const a = document.createElement('a');
-    a.href = '/admin.html'; a.className = 'btn btn-ghost'; a.id = 'adminLink'; a.textContent = '👑 Админ';
-    right.insertBefore(a, right.firstChild);
-  }
-}
-
-// ===== ТЕМЫ =====
-function applyTheme() {
-  const theme = localStorage.getItem('seekazino_theme');
-  const user = Store.getUser();
-  const owned = user && user.inventory && user.inventory.includes(theme);
-  if (theme && owned) {
-    document.documentElement.setAttribute('data-theme', theme.replace('th_', ''));
-  } else {
-    document.documentElement.removeAttribute('data-theme');
-  }
 }
