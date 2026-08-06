@@ -26,6 +26,15 @@
             <div class="stat-card"><span class="stat-value" id="admBalances">$0</span><span class="stat-label">Балансов на руках</span></div>
         </div>
 
+        <h2 class="section-title" style="margin-top:32px;">🎟️ Промокоды</h2>
+        <div class="promo-create">
+            <input type="text" class="form-input" id="promoCode" placeholder="КОД (напр. WELCOME)">
+            <input type="number" class="form-input" id="promoAmount" placeholder="Сумма $" value="10">
+            <input type="number" class="form-input" id="promoUses" placeholder="Активаций" value="10">
+            <button class="btn btn-primary" id="promoCreateBtn">Создать</button>
+        </div>
+        <div id="promoList" class="promo-list"></div>
+
         <h2 class="section-title" style="margin-top:32px;">👥 Игроки</h2>
         <div class="admin-table-wrap">
             <table class="admin-table">
