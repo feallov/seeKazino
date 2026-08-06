@@ -101,7 +101,7 @@ function updateAuthDisplay() {
   }
 }
 
-const PROTECTED_PAGES = ['index.html', 'profile.html', 'game-crash.html'];
+const PROTECTED_PAGES = ['index.html', 'profile.html', 'game-crash.html', 'game-mines.html', 'game-slots.html'];
 
 document.addEventListener('DOMContentLoaded', async () => {
   const currentPage = window.location.pathname.split('/').pop() || 'index.html';
