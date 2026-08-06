@@ -18,6 +18,21 @@ const Admin = {
       window.location.href = '/index.html';
       return;
     }
+
+    const createBtn = document.getElementById('promoCreateBtn');
+    if (createBtn) createBtn.addEventListener('click', async () => {
+      await this.api('promo-create', {
+        method: 'POST',
+        body: JSON.stringify({
+          code: document.getElementById('promoCode').value,
+          amount: parseFloat(document.getElementById('promoAmount').value) || 0,
+          max_uses: parseInt(document.getElementById('promoUses').value) || 1
+        })
+      });
+      document.getElementById('promoCode').value = '';
+      this.load();
+    });
+
     this.load();
   },
 
@@ -27,6 +42,12 @@ const Admin = {
     document.getElementById('admBets').textContent = stats.bets;
     document.getElementById('admWagered').textContent = '$' + (stats.wagered || 0).toFixed(0);
     document.getElementById('admBalances').textContent = '$' + (stats.balances || 0).toFixed(0);
+
+    const promos = await this.api('promos');
+    const pl = document.getElementById('promoList');
+    if (pl) pl.innerHTML = (promos.promos || []).map(p =>
+      `<div class="promo-item"><b>${p.code}</b> — $${p.amount} · ${p.uses}/${p.max_uses} активаций</div>`
+    ).join('') || '<p class="section-sub">Пока нет промокодов</p>';
 
     const data = await this.api('users');
     const tbody = document.getElementById('admTable');
@@ -42,8 +63,7 @@ const Admin = {
           <button class="btn btn-ghost adm-add" data-nick="${u.nick}">+$100</button>
           <button class="btn btn-ghost adm-zero" data-nick="${u.nick}">$0</button>
           <button class="btn btn-ghost adm-del" data-nick="${u.nick}">🗑</button>
-        </td>
-      `;
+        </td>`;
       tbody.appendChild(tr);
     });
 
