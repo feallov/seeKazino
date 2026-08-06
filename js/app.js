@@ -1,246 +1,279 @@
-// ===== seeKazino App Logic =====
+// ===== seeKazino App Logic (Server-side) =====
 
-// Локальное хранилище (пока нет бэкенда)
-const Store = {
-    getUser() {
-        const data = localStorage.getItem('seekazino_user');
-        return data ? JSON.parse(data) : null;
-    },
-    setUser(user) {
-        localStorage.setItem('seekazino_user', JSON.stringify(user));
-    },
-    clearUser() {
-        localStorage.removeItem('seekazino_user');
-    },
-    getBalance() {
-        const user = this.getUser();
-        return user ? user.balance : 10.00;
-    },
-    setBalance(amount) {
-        const user = this.getUser();
-        if (user) {
-            user.balance = amount;
-            this.setUser(user);
-        }
-        updateBalanceDisplay();
-    }
+const API = {
+  async register(nick, password, avatar) {
+    const res = await fetch('/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nick, password, avatar })
+    });
+    return res.json();
+  },
+
+  async login(nick, password) {
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nick, password })
+    });
+    return res.json();
+  },
+
+  async getUser(nick) {
+    const res = await fetch(`/api/user?nick=${encodeURIComponent(nick)}`);
+    return res.json();
+  },
+
+  async updateStats(nick, bet, winAmount) {
+    const res = await fetch('/api/update-stats', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nick, bet, winAmount })
+    });
+    return res.json();
+  },
+
+  async updateBalance(nick, newBalance) {
+    const res = await fetch('/api/update-balance', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ nick, newBalance })
+    });
+    return res.json();
+  }
 };
 
-// Обновление отображения баланса
-function updateBalanceDisplay() {
-    const balance = Store.getBalance();
-    const elements = document.querySelectorAll('#balanceAmount, #profileBalance');
-    elements.forEach(el => {
-        if (el) el.textContent = '$' + balance.toFixed(2);
-    });
-}
-
-// Обновление отображения авторизации
-function updateAuthDisplay() {
-    const user = Store.getUser();
-    const loginBtn = document.getElementById('loginBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
-    const avatarBtn = document.getElementById('avatarBtn');
-
+const Store = {
+  getNick() {
+    return localStorage.getItem('seekazino_nick');
+  },
+  setNick(nick) {
+    localStorage.setItem('seekazino_nick', nick);
+  },
+  clearNick() {
+    localStorage.removeItem('seekazino_nick');
+    localStorage.removeItem('seekazino_user');
+  },
+  getUser() {
+    const data = localStorage.getItem('seekazino_user');
+    return data ? JSON.parse(data) : null;
+  },
+  setUser(user) {
+    localStorage.setItem('seekazino_user', JSON.stringify(user));
+  },
+  getBalance() {
+    const user = this.getUser();
+    return user ? user.balance : 10.00;
+  },
+  setBalance(amount) {
+    const user = this.getUser();
     if (user) {
-        if (loginBtn) loginBtn.style.display = 'none';
-        if (logoutBtn) logoutBtn.style.display = 'block';
-        if (avatarBtn) {
-            avatarBtn.textContent = user.avatar || '😎';
-            avatarBtn.href = 'profile.html';
-        }
+      user.balance = amount;
+      this.setUser(user);
+      updateBalanceDisplay();
     }
+  },
+  async refreshUser() {
+    const nick = this.getNick();
+    if (!nick) return null;
+    const data = await API.getUser(nick);
+    if (data.user) {
+      this.setUser(data.user);
+      updateBalanceDisplay();
+      updateAuthDisplay();
+      initProfile();
+    }
+    return data.user;
+  }
+};
+
+function updateBalanceDisplay() {
+  const balance = Store.getBalance();
+  const elements = document.querySelectorAll('#balanceAmount, #profileBalance');
+  elements.forEach(el => {
+    if (el) el.textContent = '$' + Number(balance).toFixed(2);
+  });
 }
 
-// Инициализация при загрузке
-document.addEventListener('DOMContentLoaded', () => {
-    updateBalanceDisplay();
-    updateAuthDisplay();
-    initAuth();
-    initProfile();
+function updateAuthDisplay() {
+  const user = Store.getUser();
+  const loginBtn = document.getElementById('loginBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const avatarBtn = document.getElementById('avatarBtn');
+
+  if (user) {
+    if (loginBtn) loginBtn.style.display = 'none';
+    if (logoutBtn) logoutBtn.style.display = 'block';
+    if (avatarBtn) {
+      avatarBtn.textContent = user.avatar || '😎';
+      avatarBtn.href = 'profile.html';
+    }
+  }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+  // Если залогинен — подтягиваем свежие данные с сервера
+  if (Store.getNick()) {
+    await Store.refreshUser();
+  }
+  
+  updateBalanceDisplay();
+  updateAuthDisplay();
+  initAuth();
+  initProfile();
 });
 
 // ===== АВТОРИЗАЦИЯ =====
 function initAuth() {
-    // Табы
-    const tabs = document.querySelectorAll('.auth-tab');
-    const loginForm = document.getElementById('loginForm');
-    const registerForm = document.getElementById('registerForm');
+  const tabs = document.querySelectorAll('.auth-tab');
+  const loginForm = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
 
-    tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-            tabs.forEach(t => t.classList.remove('active'));
-            tab.classList.add('active');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
 
-            if (tab.dataset.tab === 'login') {
-                loginForm.style.display = 'block';
-                registerForm.style.display = 'none';
-            } else {
-                loginForm.style.display = 'none';
-                registerForm.style.display = 'block';
-            }
-            hideError();
-        });
+      if (tab.dataset.tab === 'login') {
+        loginForm.style.display = 'block';
+        registerForm.style.display = 'none';
+      } else {
+        loginForm.style.display = 'none';
+        registerForm.style.display = 'block';
+      }
+      hideError();
     });
+  });
 
-    // Выбор аватара
-    const avatarOptions = document.querySelectorAll('.avatar-option');
-    avatarOptions.forEach(opt => {
-        opt.addEventListener('click', () => {
-            avatarOptions.forEach(o => o.classList.remove('selected'));
-            opt.classList.add('selected');
-        });
+  const avatarOptions = document.querySelectorAll('.avatar-option');
+  avatarOptions.forEach(opt => {
+    opt.addEventListener('click', () => {
+      avatarOptions.forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
     });
+  });
 
-    // Вход
-    if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const nick = document.getElementById('loginNick').value.trim();
-            const pass = document.getElementById('loginPass').value;
+  // ВХОД
+  if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nick = document.getElementById('loginNick').value.trim();
+      const pass = document.getElementById('loginPass').value;
 
-            // Проверяем сохранённых пользователей
-            const users = JSON.parse(localStorage.getItem('seekazino_users') || '{}');
-            
-            if (!users[nick]) {
-                showError('Пользователь не найден');
-                return;
-            }
-            if (users[nick].password !== pass) {
-                showError('Неверный пароль');
-                return;
-            }
+      disableForm(loginForm, true);
+      const data = await API.login(nick, pass);
+      disableForm(loginForm, false);
 
-            // Логин успешен
-            Store.setUser(users[nick]);
-            window.location.href = 'index.html';
-        });
-    }
+      if (!data.success) {
+        showError(data.error || 'Ошибка входа');
+        return;
+      }
 
-    // Регистрация
-    if (registerForm) {
-        registerForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const nick = document.getElementById('regNick').value.trim();
-            const pass = document.getElementById('regPass').value;
-            const avatar = document.querySelector('.avatar-option.selected')?.dataset.avatar || '😎';
+      Store.setNick(nick);
+      Store.setUser(data.user);
+      window.location.href = 'index.html';
+    });
+  }
 
-            if (nick.length < 3) {
-                showError('Ник должен быть минимум 3 символа');
-                return;
-            }
-            if (pass.length < 6) {
-                showError('Пароль должен быть минимум 6 символов');
-                return;
-            }
+  // РЕГИСТРАЦИЯ
+  if (registerForm) {
+    registerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nick = document.getElementById('regNick').value.trim();
+      const pass = document.getElementById('regPass').value;
+      const avatar = document.querySelector('.avatar-option.selected')?.dataset.avatar || '😎';
 
-            const users = JSON.parse(localStorage.getItem('seekazino_users') || '{}');
-            
-            if (users[nick]) {
-                showError('Этот ник уже занят');
-                return;
-            }
+      disableForm(registerForm, true);
+      const data = await API.register(nick, pass, avatar);
+      disableForm(registerForm, false);
 
-            // Создаём пользователя
-            const newUser = {
-                nick,
-                password: pass,
-                avatar,
-                balance: 10.00,
-                level: 1,
-                xp: 0,
-                stats: {
-                    bets: 0,
-                    wins: 0,
-                    losses: 0,
-                    wagered: 0,
-                    profit: 0,
-                    biggestWin: 0
-                },
-                createdAt: Date.now()
-            };
+      if (!data.success) {
+        showError(data.error || 'Ошибка регистрации');
+        return;
+      }
 
-            users[nick] = newUser;
-            localStorage.setItem('seekazino_users', JSON.stringify(users));
-            Store.setUser(newUser);
-            window.location.href = 'index.html';
-        });
-    }
+      Store.setNick(nick);
+      Store.setUser(data.user);
+      window.location.href = 'index.html';
+    });
+  }
 
-    // Выход
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
-            Store.clearUser();
-            window.location.reload();
-        });
-    }
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      Store.clearNick();
+      window.location.href = 'index.html';
+    });
+  }
+}
+
+function disableForm(form, disabled) {
+  form.querySelectorAll('button, input').forEach(el => {
+    el.disabled = disabled;
+  });
 }
 
 function showError(msg) {
-    const el = document.getElementById('authError');
-    if (el) {
-        el.textContent = msg;
-        el.style.display = 'block';
-    }
+  const el = document.getElementById('authError');
+  if (el) {
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
 }
 
 function hideError() {
-    const el = document.getElementById('authError');
-    if (el) el.style.display = 'none';
+  const el = document.getElementById('authError');
+  if (el) el.style.display = 'none';
 }
 
 // ===== ПРОФИЛЬ =====
 function initProfile() {
-    const user = Store.getUser();
-    if (!user) return;
+  const user = Store.getUser();
+  if (!user) return;
 
-    const nameEl = document.getElementById('profileName');
-    const avatarEl = document.getElementById('profileAvatar');
-    const levelBadge = document.getElementById('levelBadge');
-    const levelName = document.getElementById('levelName');
-    const xpBar = document.getElementById('xpBar');
-    const xpText = document.getElementById('xpText');
+  setText('profileName', user.nick);
+  const avatarEl = document.getElementById('profileAvatar');
+  if (avatarEl) avatarEl.textContent = user.avatar || '😎';
 
-    if (nameEl) nameEl.textContent = user.nick;
-    if (avatarEl) avatarEl.textContent = user.avatar || '😎';
+  const levels = [
+    { level: 1, name: 'Newbie', xp: 0 },
+    { level: 2, name: 'Regular', xp: 500 },
+    { level: 3, name: 'Grinder', xp: 2000 },
+    { level: 4, name: 'High Roller', xp: 5000 },
+    { level: 5, name: 'Shark', xp: 15000 },
+    { level: 6, name: 'Whale', xp: 50000 }
+  ];
 
-    // Уровни
-    const levels = [
-        { level: 1, name: 'Newbie', xp: 0 },
-        { level: 2, name: 'Regular', xp: 500 },
-        { level: 3, name: 'Grinder', xp: 2000 },
-        { level: 4, name: 'High Roller', xp: 5000 },
-        { level: 5, name: 'Shark', xp: 15000 },
-        { level: 6, name: 'Whale', xp: 50000 }
-    ];
+  const currentLevel = levels.filter(l => user.xp >= l.xp).pop() || levels[0];
+  const nextLevel = levels.find(l => l.xp > user.xp);
 
-    const currentLevel = levels.filter(l => user.xp >= l.xp).pop() || levels[0];
-    const nextLevel = levels.find(l => l.xp > user.xp);
+  const levelBadge = document.getElementById('levelBadge');
+  const levelName = document.getElementById('levelName');
+  if (levelBadge) levelBadge.textContent = 'Уровень ' + currentLevel.level;
+  if (levelName) levelName.textContent = currentLevel.name;
 
-    if (levelBadge) levelBadge.textContent = 'Уровень ' + currentLevel.level;
-    if (levelName) levelName.textContent = currentLevel.name;
+  const xpBar = document.getElementById('xpBar');
+  if (xpBar && nextLevel) {
+    const progress = ((user.xp - currentLevel.xp) / (nextLevel.xp - currentLevel.xp)) * 100;
+    xpBar.style.width = Math.min(progress, 100) + '%';
+  }
+  const xpText = document.getElementById('xpText');
+  if (xpText && nextLevel) {
+    xpText.textContent = user.xp + ' / ' + nextLevel.xp + ' XP';
+  }
 
-    if (xpBar && nextLevel) {
-        const progress = ((user.xp - currentLevel.xp) / (nextLevel.xp - currentLevel.xp)) * 100;
-        xpBar.style.width = Math.min(progress, 100) + '%';
-    }
-    if (xpText && nextLevel) {
-        xpText.textContent = user.xp + ' / ' + nextLevel.xp + ' XP';
-    }
-
-    // Статистика
-    if (user.stats) {
-        setText('statBets', user.stats.bets);
-        setText('statWins', user.stats.wins);
-        setText('statLosses', user.stats.losses);
-        setText('statWagered', '$' + user.stats.wagered.toFixed(2));
-        setText('statProfit', (user.stats.profit >= 0 ? '+$' : '-$') + Math.abs(user.stats.profit).toFixed(2));
-        setText('statBiggest', '$' + user.stats.biggestWin.toFixed(2));
-    }
+  if (user.bets !== undefined) {
+    setText('statBets', user.bets);
+    setText('statWins', user.wins);
+    setText('statLosses', user.losses);
+    setText('statWagered', '$' + (user.wagered || 0).toFixed(2));
+    const profit = user.profit || 0;
+    setText('statProfit', (profit >= 0 ? '+$' : '-$') + Math.abs(profit).toFixed(2));
+    setText('statBiggest', '$' + (user.biggestWin || 0).toFixed(2));
+  }
 }
 
 function setText(id, value) {
-    const el = document.getElementById(id);
-    if (el) el.textContent = value;
+  const el = document.getElementById(id);
+  if (el) el.textContent = value;
 }
