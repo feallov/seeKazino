@@ -121,6 +121,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   pingOnline();
   setInterval(pingOnline, 30000);
+    injectHeaderLinks();
+  applyTheme();
 });
 
 function initAuth() {
