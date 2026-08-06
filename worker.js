@@ -120,6 +120,23 @@ function checkAchievements(user, s) {
   return newOnes;
 }
 
+// ===== РЕАЛЬНЫЙ ОНЛАЙН =====
+async function ping(request, env) {
+  const { sid } = await request.json();
+  if (!sid) return json({ error: 'Нет sid' }, 400);
+
+  const now = Date.now();
+  await env.DB.prepare(
+    'INSERT INTO presence (sid, last_seen) VALUES (?, ?) ON CONFLICT(sid) DO UPDATE SET last_seen = ?'
+  ).bind(sid, now, now).run();
+
+  const cutoff = now - 5 * 60 * 1000; // последние 5 минут
+  await env.DB.prepare('DELETE FROM presence WHERE last_seen < ?').bind(cutoff).run();
+
+  const row = await env.DB.prepare('SELECT COUNT(*) AS c FROM presence WHERE last_seen >= ?').bind(cutoff).first();
+  return json({ online: row.c });
+}
+
 async function sha256(text) {
   const data = new TextEncoder().encode(text);
   const hashBuffer = await crypto.subtle.digest('SHA-256', data);
