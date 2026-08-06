@@ -32,6 +32,7 @@ const Store = {
   clearNick() {
     localStorage.removeItem('seekazino_nick');
     localStorage.removeItem('seekazino_user');
+    localStorage.removeItem('seekazino_token');
   },
   getUser() {
     const data = localStorage.getItem('seekazino_user');
