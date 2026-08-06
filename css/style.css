@@ -656,3 +656,29 @@ a { text-decoration: none; color: inherit; }
     .profile-balance { text-align: center; }
     .stats-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
+/* ===== ACHIEVEMENTS (new) ===== */
+.achievement-card {
+  position: relative;
+}
+
+.achievement-card.achievement-unlocked {
+  opacity: 1;
+  border-color: var(--green);
+  background: linear-gradient(135deg, var(--surface) 0%, rgba(26, 77, 58, 0.3) 100%);
+}
+
+.achievement-card.achievement-unlocked .achievement-icon {
+  filter: none;
+}
+
+.achievement-card.achievement-locked .achievement-icon {
+  filter: grayscale(1);
+}
+
+.achievement-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 4px;
+  display: block;
+}
