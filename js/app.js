@@ -318,3 +318,26 @@ function setText(id, value) {
   const el = document.getElementById(id);
   if (el) el.textContent = value;
 }
+
+// ===== РЕАЛЬНЫЙ ОНЛАЙН =====
+function getSid() {
+  let sid = localStorage.getItem('seekazino_sid');
+  if (!sid) {
+    sid = 's' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    localStorage.setItem('seekazino_sid', sid);
+  }
+  return sid;
+}
+
+async function pingOnline() {
+  try {
+    const res = await fetch('/api/ping', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sid: getSid() })
+    });
+    const data = await res.json();
+    const el = document.getElementById('onlineCount');
+    if (el && data.online !== undefined) el.textContent = data.online;
+  } catch (e) {}
+}
