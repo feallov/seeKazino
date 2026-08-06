@@ -32,6 +32,10 @@ async function handleApi(request, env, url) {
     if (request.method === 'POST' && path === '/api/ping') return await ping(request, env);
     if (request.method === 'GET' && path === '/api/shop') return json({ items: CATALOG });
     if (request.method === 'POST' && path === '/api/buy') return await buy(request, env);
+        if (request.method === 'GET' && path === '/api/leaderboard') return await leaderboard(env);
+    if (request.method === 'GET' && path === '/api/feed') return await getFeed(env);
+    if (request.method === 'POST' && path === '/api/daily-bonus') return await dailyBonus(request, env);
+    if (request.method === 'POST' && path === '/api/promo') return await activatePromo(request, env);
 
     // ===== АДМИН =====
     if (path.startsWith('/api/admin/')) {
