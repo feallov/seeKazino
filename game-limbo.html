@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>seeKazino — Limbo</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <a href="index.html" class="logo"><span class="logo-icon">🎰</span><span>see<span class="logo-accent">Kazino</span></span></a>
+            <div class="header-right">
+                <div class="balance-pill"><span class="balance-icon">💰</span><span id="balanceAmount">$10.00</span></div>
+                <a href="index.html" class="btn btn-ghost">← В лобби</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main game-layout">
+        <div class="crash-display">
+            <div class="dice-result" id="limboResult">1.00x</div>
+            <div class="crash-status" id="limboStatus">Цель: выбей множитель выше целевого!</div>
+        </div>
+
+        <div class="crash-controls">
+            <div class="bet-section">
+                <label class="form-label">Ставка</label>
+                <div class="bet-input-group">
+                    <button class="bet-adjust" id="betMinus">−</button>
+                    <input type="number" class="form-input bet-input" id="betAmount" value="1.00" min="0.10" step="0.10">
+                    <button class="bet-adjust" id="betPlus">+</button>
+                </div>
+            </div>
+
+            <div class="bet-section">
+                <label class="form-label">Целевой множитель</label>
+                <div class="bet-input-group">
+                    <button class="bet-adjust" id="tgtMinus">−</button>
+                    <input type="number" class="form-input bet-input" id="targetInput" value="2.00" min="1.01" step="0.5">
+                    <button class="bet-adjust" id="tgtPlus">+</button>
+                </div>
+            </div>
+
+            <div class="mines-info">
+                <div class="mines-info-row"><span>Шанс:</span><span id="limboChance">49.5%</span></div>
+                <div class="mines-info-row"><span>Выигрыш:</span><span id="limboWin" class="text-green">$2.00</span></div>
+            </div>
+
+            <button class="btn btn-primary btn-full btn-large" id="limboRollBtn">👻 Крутить</button>
+        </div>
+    </main>
+
+    <script src="js/limbo.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
