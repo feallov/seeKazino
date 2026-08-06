@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>seeKazino — Вход</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">🎰</span>
+                <span>see<span class="logo-accent">Kazino</span></span>
+            </a>
+        </div>
+    </header>
+
+    <main class="auth-container">
+        <div class="auth-card">
+            <!-- Табы -->
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">Вход</button>
+                <button class="auth-tab" data-tab="register">Регистрация</button>
+            </div>
+
+            <!-- Форма входа -->
+            <form id="loginForm" class="auth-form">
+                <div class="form-group">
+                    <label class="form-label">Ник</label>
+                    <input type="text" class="form-input" id="loginNick" placeholder="Твой ник" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Пароль</label>
+                    <input type="password" class="form-input" id="loginPass" placeholder="••••••••" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">Войти</button>
+                <p class="auth-hint">Стартовый баланс: <span class="text-green">$10.00</span></p>
+            </form>
+
+            <!-- Форма регистрации -->
+            <form id="registerForm" class="auth-form" style="display:none;">
+                <div class="form-group">
+                    <label class="form-label">Ник</label>
+                    <input type="text" class="form-input" id="regNick" placeholder="Придумай ник" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Пароль</label>
+                    <input type="password" class="form-input" id="regPass" placeholder="Минимум 6 символов" required autocomplete="new-password">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Аватар</label>
+                    <div class="avatar-picker" id="avatarPicker">
+                        <button type="button" class="avatar-option selected" data-avatar="😎">😎</button>
+                        <button type="button" class="avatar-option" data-avatar="🦊">🦊</button>
+                        <button type="button" class="avatar-option" data-avatar="🐺">🐺</button>
+                        <button type="button" class="avatar-option" data-avatar="👾">👾</button>
+                        <button type="button" class="avatar-option" data-avatar="🤖">🤖</button>
+                        <button type="button" class="avatar-option" data-avatar="💀">💀</button>
+                        <button type="button" class="avatar-option" data-avatar="🔥">🔥</button>
+                        <button type="button" class="avatar-option" data-avatar="⭐">⭐</button>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-full">Создать аккаунт</button>
+                <p class="auth-hint">Получи <span class="text-green">$10.00</span> на старт!</p>
+            </form>
+
+            <!-- Сообщение об ошибке -->
+            <div id="authError" class="auth-error" style="display:none;"></div>
+        </div>
+    </main>
+
+    <script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>seeKazino — Профиль</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">🎰</span>
+                <span>see<span class="logo-accent">Kazino</span></span>
+            </a>
+            <div class="header-right">
+                <div class="balance-pill">
+                    <span class="balance-icon">💰</span>
+                    <span id="balanceAmount">$10.00</span>
+                </div>
+                <a href="index.html" class="btn btn-ghost">← В лобби</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <!-- Карточка профиля -->
+        <div class="profile-card">
+            <div class="profile-top">
+                <div class="profile-avatar" id="profileAvatar">😎</div>
+                <div class="profile-info">
+                    <h1 class="profile-name" id="profileName">Игрок</h1>
+                    <div class="profile-level">
+                        <span class="level-badge" id="levelBadge">Уровень 1</span>
+                        <span class="level-name" id="levelName">Newbie</span>
+                    </div>
+                    <div class="xp-bar-container">
+                        <div class="xp-bar" id="xpBar" style="width: 0%"></div>
+                    </div>
+                    <span class="xp-text" id="xpText">0 / 500 XP</span>
+                </div>
+                <div class="profile-balance">
+                    <span class="profile-balance-label">Баланс</span>
+                    <span class="profile-balance-value" id="profileBalance">$10.00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Статистика -->
+        <h2 class="section-title" style="margin-top: 32px;">📊 Статистика</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <span class="stat-value" id="statBets">0</span>
+                <span class="stat-label">Всего ставок</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value text-green" id="statWins">0</span>
+                <span class="stat-label">Побед</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value text-red" id="statLosses">0</span>
+                <span class="stat-label">Поражений</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value" id="statWagered">$0.00</span>
+                <span class="stat-label">Поставлено</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value" id="statProfit">$0.00</span>
+                <span class="stat-label">Чистая прибыль</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value text-green" id="statBiggest">$0.00</span>
+                <span class="stat-label">Крупнейший выигрыш</span>
+            </div>
+        </div>
+
+        <!-- Достижения -->
+        <h2 class="section-title" style="margin-top: 32px;">🏆 Достижения</h2>
+        <div class="achievements-grid">
+            <div class="achievement-card achievement-locked">
+                <span class="achievement-icon">🥇</span>
+                <span class="achievement-name">Первая победа</span>
+            </div>
+            <div class="achievement-card achievement-locked">
+                <span class="achievement-icon">🔥</span>
+                <span class="achievement-name">Серия x5</span>
+            </div>
+            <div class="achievement-card achievement-locked">
+                <span class="achievement-icon">💎</span>
+                <span class="achievement-name">Хайроллер</span>
+            </div>
+            <div class="achievement-card achievement-locked">
+                <span class="achievement-icon">🎯</span>
+                <span class="achievement-name">Острый глаз</span>
+            </div>
+            <div class="achievement-card achievement-locked">
+                <span class="achievement-icon">👑</span>
+                <span class="achievement-name">Whale</span>
+            </div>
+            <div class="achievement-card achievement-locked">
+                <span class="achievement-icon">⚡</span>
+                <span class="achievement-name">Спидран</span>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
