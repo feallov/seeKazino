@@ -784,3 +784,86 @@ a { text-decoration: none; color: inherit; }
 .promo-create .form-input { width: auto; flex: 1; min-width: 120px; }
 .promo-list { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
 .promo-item { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 13px; }
+
+/* =========================================
+   МОБИЛЬНАЯ АДАПТАЦИЯ
+   ========================================= */
+
+@media (max-width: 768px) {
+  /* Шапка */
+  .header-inner { flex-wrap: wrap; height: auto; padding: 10px 12px; gap: 8px; }
+  .logo { font-size: 16px; }
+  .logo-icon { font-size: 20px; }
+  .header-right { flex-wrap: wrap; gap: 6px; margin-left: auto; }
+  .header .btn, .header-right .btn { padding: 6px 10px; font-size: 12px; }
+  .balance-pill { padding: 6px 10px; font-size: 12px; }
+  .avatar-btn { width: 30px; height: 30px; font-size: 15px; }
+
+  /* Основное */
+  .main { padding: 20px 12px; }
+  .section-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .section-title { font-size: 20px; }
+
+  /* Лобби */
+  .games-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .game-art { height: 90px; }
+  .game-icon { font-size: 38px; }
+  .game-info { padding: 12px; }
+  .game-name { font-size: 14px; }
+  .game-sub { font-size: 11px; }
+  .players-count { font-size: 10px; }
+
+  /* Игровые страницы */
+  .game-layout { grid-template-columns: 1fr; gap: 16px; }
+  .crash-display { padding: 16px; min-height: auto; }
+  .crash-multiplier { font-size: 36px; }
+  .dice-result { font-size: 40px; }
+  .roulette-number { width: 90px; height: 90px; font-size: 34px; }
+  canvas { max-width: 100%; height: auto; }
+
+  /* Слоты */
+  .slot-reel { width: 84px; height: 100px; font-size: 40px; }
+
+  /* Blackjack */
+  .bj-card { width: 52px; height: 76px; }
+  .bj-card .bj-rank { font-size: 17px; }
+  .bj-card .bj-suit { font-size: 15px; }
+
+  /* Панель управления */
+  .crash-controls { padding: 16px; }
+  .bet-presets { flex-wrap: wrap; }
+  .btn-large { padding: 12px 16px; font-size: 14px; }
+
+  /* Keno */
+  .keno-grid { gap: 4px; }
+  .keno-cell { font-size: 11px; }
+
+  /* Профиль */
+  .profile-top { flex-direction: column; text-align: center; gap: 12px; }
+  .profile-balance { text-align: center; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .achievements-grid { grid-template-columns: repeat(2, 1fr); }
+
+  /* Магазин */
+  .shop-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .promo-block { flex-direction: column; }
+
+  /* Лидерборд */
+  .lb-row { padding: 10px 12px; gap: 8px; }
+  .lb-level { display: none; }
+  .lb-profit { font-size: 12px; }
+
+  /* Админ */
+  .admin-table th, .admin-table td { padding: 8px; font-size: 12px; }
+  .admin-table .btn { padding: 3px 6px; font-size: 10px; margin-right: 2px; }
+
+  /* Вход/регистрация */
+  .auth-card { padding: 24px 18px; }
+}
+
+@media (max-width: 420px) {
+  .games-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .game-footer { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .slot-reel { width: 72px; height: 88px; font-size: 34px; }
+  .header-right .btn { padding: 5px 8px; font-size: 11px; }
+}
