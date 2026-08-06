@@ -73,14 +73,19 @@ async function login(request, env) {
   const { nick, password } = await request.json();
   if (!nick || !password) return json({ error: 'Заполни все поля' }, 400);
 
+  // АДМИН: при первом входе создаётся как настоящий игрок в базе
   if (nick.toLowerCase() === ADMIN_NICK) {
-    if (password !== ADMIN_PASS) return json({ error: 'Неверный пароль' }, 401);
-    const admin = {
-      nick: ADMIN_NICK, avatar: '👑', balance: 999999, level: 99, xp: 0, role: 'admin',
-      bets: 0, wins: 0, losses: 0, wagered: 0, profit: 0, biggestWin: 0,
-      achievements: [], streak: 0, inventory: [], boost_until: 0, last_bonus: 0
-    };
-    return json({ success: true, user: admin, token: await createSession(env, ADMIN_NICK) });
+    let row = await env.DB.prepare('SELECT * FROM users WHERE nick = ?').bind(ADMIN_NICK).first();
+    if (!row) {
+      const hash = await sha256(ADMIN_PASS);
+      await env.DB.prepare(
+        "INSERT INTO users (nick, password_hash, avatar, balance, level, xp, role, inventory, boost_until) VALUES (?, ?, '👑', 10.00, 1, 0, 'admin', '[]', 0)"
+      ).bind(ADMIN_NICK, hash).run();
+      row = await env.DB.prepare('SELECT * FROM users WHERE nick = ?').bind(ADMIN_NICK).first();
+    }
+    const hash = await sha256(password);
+    if (hash !== row.password_hash) return json({ error: 'Неверный пароль' }, 401);
+    return json({ success: true, user: await fetchUser(env, ADMIN_NICK), token: await createSession(env, ADMIN_NICK) });
   }
 
   const user = await env.DB.prepare('SELECT * FROM users WHERE nick = ?').bind(nick).first();
