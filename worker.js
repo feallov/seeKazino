@@ -4,12 +4,10 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    // Всё, что начинается с /api/ — идёт в логику API
     if (url.pathname.startsWith('/api/')) {
       return handleApi(request, env, url);
     }
 
-    // Всё остальное — статика (HTML/CSS/JS)
     return env.ASSETS.fetch(request);
   }
 };
@@ -18,17 +16,14 @@ async function handleApi(request, env, url) {
   const path = url.pathname;
 
   try {
-    if (request.method === 'POST' && path === '/api/register') {
-      return await register(request, env);
-    }
-    if (request.method === 'POST' && path === '/api/login') {
-      return await login(request, env);
-    }
-    if (request.method === 'GET' && path === '/api/balance') {
-      return await balance(env, url);
-    }
+    if (request.method === 'POST' && path === '/api/register') return await register(request, env);
+    if (request.method === 'POST' && path === '/api/login') return await login(request, env);
+    if (request.method === 'GET' && path === '/api/user') return await getUser(env, url);
+    if (request.method === 'POST' && path === '/api/update-stats') return await updateStats(request, env);
+    if (request.method === 'POST' && path === '/api/update-balance') return await updateBalance(request, env);
     return json({ error: 'Не найдено' }, 404);
   } catch (e) {
+    console.error(e);
     return json({ error: 'Ошибка сервера' }, 500);
   }
 }
@@ -49,7 +44,10 @@ async function register(request, env) {
     "INSERT INTO users (nick, password_hash, avatar, balance, level, xp, role) VALUES (?, ?, ?, 10.00, 1, 0, 'user')"
   ).bind(nick, passwordHash, avatar || '😎').run();
 
-  return json({ success: true, user: { nick, avatar: avatar || '😎', balance: 10.00 } }, 201);
+  return json({ 
+    success: true, 
+    user: await fetchUser(env, nick) 
+  }, 201);
 }
 
 // ===== ВХОД =====
@@ -63,28 +61,79 @@ async function login(request, env) {
   const passwordHash = await sha256(password);
   if (user.password_hash !== passwordHash) return json({ error: 'Неверный пароль' }, 401);
 
-  return json({
-    success: true,
-    user: {
-      nick: user.nick,
-      avatar: user.avatar,
-      balance: user.balance,
-      level: user.level,
-      xp: user.xp,
-      role: user.role
-    }
+  return json({ 
+    success: true, 
+    user: await fetchUser(env, nick) 
   });
 }
 
-// ===== БАЛАНС =====
-async function balance(env, url) {
+// ===== ПОЛУЧИТЬ ЮЗЕРА =====
+async function getUser(env, url) {
   const nick = url.searchParams.get('nick');
   if (!nick) return json({ error: 'Укажи ник' }, 400);
 
-  const user = await env.DB.prepare('SELECT balance FROM users WHERE nick = ?').bind(nick).first();
+  const user = await fetchUser(env, nick);
   if (!user) return json({ error: 'Не найден' }, 404);
 
-  return json({ balance: user.balance });
+  return json({ user });
+}
+
+async function fetchUser(env, nick) {
+  const row = await env.DB.prepare('SELECT * FROM users WHERE nick = ?').bind(nick).first();
+  if (!row) return null;
+  return {
+    nick: row.nick,
+    avatar: row.avatar,
+    balance: row.balance,
+    level: row.level,
+    xp: row.xp,
+    role: row.role,
+    bets: row.bets,
+    wins: row.wins,
+    losses: row.losses,
+    wagered: row.wagered,
+    profit: row.profit,
+    biggestWin: row.biggest_win
+  };
+}
+
+// ===== ОБНОВИТЬ БАЛАНС (для игр) =====
+async function updateBalance(request, env) {
+  const { nick, newBalance } = await request.json();
+  if (!nick || newBalance === undefined) return json({ error: 'Параметры' }, 400);
+
+  await env.DB.prepare('UPDATE users SET balance = ? WHERE nick = ?')
+    .bind(newBalance, nick).run();
+
+  return json({ success: true, balance: newBalance });
+}
+
+// ===== ОБНОВИТЬ СТАТИСТИКУ (после игры) =====
+async function updateStats(request, env) {
+  const { nick, bet, winAmount } = await request.json();
+  if (!nick) return json({ error: 'Нет ника' }, 400);
+
+  const user = await env.DB.prepare('SELECT * FROM users WHERE nick = ?').bind(nick).first();
+  if (!user) return json({ error: 'Юзер не найден' }, 404);
+
+  const won = winAmount > 0;
+  const newBets = user.bets + 1;
+  const newWagered = user.wagered + bet;
+  const newProfit = user.profit + (winAmount - bet);
+  const newWins = won ? user.wins + 1 : user.wins;
+  const newLosses = won ? user.losses : user.losses + 1;
+  const newBiggest = Math.max(user.biggest_win, winAmount);
+  const newBalance = user.balance + (winAmount - bet);
+  const newXp = user.xp + (won ? 25 : 10);
+
+  await env.DB.prepare(
+    'UPDATE users SET bets=?, wagered=?, profit=?, wins=?, losses=?, biggest_win=?, balance=?, xp=? WHERE nick=?'
+  ).bind(newBets, newWagered, newProfit, newWins, newLosses, newBiggest, newBalance, newXp, nick).run();
+
+  return json({ 
+    success: true, 
+    user: await fetchUser(env, nick) 
+  });
 }
 
 // ===== ПОМОЩНИКИ =====
@@ -99,6 +148,11 @@ async function sha256(text) {
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { 'Content-Type': 'application/json' }
+    headers: { 
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type'
+    }
   });
 }
