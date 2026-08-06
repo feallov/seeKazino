@@ -730,3 +730,15 @@ a { text-decoration: none; color: inherit; }
 
 /* градиент для Dice */
 .grad-dice { background: linear-gradient(135deg, #22303A 0%, #0B0D10 100%); }
+
+/* ===== KENO ===== */
+.keno-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; width: 100%; max-width: 440px; }
+.keno-cell { aspect-ratio: 1; background: var(--surface-hover); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+.keno-cell:hover { border-color: var(--green-bright); }
+.keno-cell.picked { background: var(--green); border-color: var(--green-bright); }
+.keno-cell.drawn { background: var(--bg); color: var(--text-muted); border-color: var(--border); }
+.keno-cell.hit { background: var(--green-bright); color: #000; border-color: var(--green-bright); }
+
+/* ===== WHEEL ===== */
+.wheel-wrap { position: relative; }
+.wheel-pointer { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); color: var(--green-bright); font-size: 20px; z-index: 2; }
