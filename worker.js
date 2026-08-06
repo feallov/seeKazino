@@ -44,6 +44,8 @@ async function handleApi(request, env, url) {
       if (path === '/api/admin/users') return await adminUsers(env);
       if (path === '/api/admin/balance') return await adminBalance(request, env);
       if (path === '/api/admin/delete') return await adminDelete(request, env);
+            if (path === '/api/admin/promo-create') return await adminPromoCreate(request, env);
+      if (path === '/api/admin/promos') return await adminPromos(env);
     }
 
     return json({ error: 'Не найдено' }, 404);
