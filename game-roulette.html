@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>seeKazino — Roulette</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <a href="index.html" class="logo"><span class="logo-icon">🎰</span><span>see<span class="logo-accent">Kazino</span></span></a>
+            <div class="header-right">
+                <div class="balance-pill"><span class="balance-icon">💰</span><span id="balanceAmount">$10.00</span></div>
+                <a href="index.html" class="btn btn-ghost">← В лобби</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main game-layout">
+        <div class="crash-display">
+            <div class="roulette-number" id="rouletteNumber">—</div>
+            <div class="crash-status" id="rouletteStatus">Выбери цвет и крути!</div>
+            <div class="roulette-history" id="rouletteHistory"></div>
+        </div>
+
+        <div class="crash-controls">
+            <div class="bet-section">
+                <label class="form-label">Ставка</label>
+                <div class="bet-input-group">
+                    <button class="bet-adjust" id="betMinus">−</button>
+                    <input type="number" class="form-input bet-input" id="betAmount" value="1.00" min="0.10" step="0.10">
+                    <button class="bet-adjust" id="betPlus">+</button>
+                </div>
+            </div>
+
+            <div class="bet-section">
+                <label class="form-label">На что ставим</label>
+                <div class="roulette-bets">
+                    <button class="roulette-btn red selected" data-color="red">КРАСНОЕ x2</button>
+                    <button class="roulette-btn green" data-color="green">ЗЕРО x14</button>
+                    <button class="roulette-btn black" data-color="black">ЧЁРНОЕ x2</button>
+                </div>
+            </div>
+
+            <button class="btn btn-primary btn-full btn-large" id="spinBtn">🎡 Крутить</button>
+        </div>
+    </main>
+
+    <script src="js/roulette.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
