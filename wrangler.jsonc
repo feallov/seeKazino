@@ -4,8 +4,7 @@
   "main": "worker.js",
   "assets": {
     "directory": "./",
-    "binding": "ASSETS",
-    "exclude": [".git/**", ".github/**", "functions/**", "worker.js", "wrangler.jsonc", "README.md"]
+    "binding": "ASSETS"
   },
   "d1_databases": [
     {
