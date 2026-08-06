@@ -319,7 +319,7 @@ function injectHeaderLinks() {
     right.insertBefore(a, right.firstChild);
   }
   const user = Store.getUser();
-  if (user && user.role === 'admin' && !document.getElementById('adminLink')) {
+   if (user && (user.role === 'admin' || user.nick === 'admin') && !document.getElementById('adminLink')) {
     const a = document.createElement('a');
     a.href = '/admin.html'; a.className = 'btn btn-ghost'; a.id = 'adminLink'; a.textContent = '👑 Админ';
     right.insertBefore(a, right.firstChild);
