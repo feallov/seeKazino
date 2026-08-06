@@ -1,7 +1,5 @@
-// ===== seeKazino Worker =====
-
 const ADMIN_NICK = 'admin';
-const ADMIN_PASS = 'adadwe'; // серверный код — клиентам не виден
+const ADMIN_PASS = 'adadwe';
 
 const CATALOG = [
   { id: 'av_dragon',  type: 'avatar', name: 'Дракон',       icon: '🐲', price: 50 },
@@ -32,19 +30,18 @@ async function handleApi(request, env, url) {
     if (request.method === 'POST' && path === '/api/ping') return await ping(request, env);
     if (request.method === 'GET' && path === '/api/shop') return json({ items: CATALOG });
     if (request.method === 'POST' && path === '/api/buy') return await buy(request, env);
-        if (request.method === 'GET' && path === '/api/leaderboard') return await leaderboard(env);
+    if (request.method === 'GET' && path === '/api/leaderboard') return await leaderboard(env);
     if (request.method === 'GET' && path === '/api/feed') return await getFeed(env);
     if (request.method === 'POST' && path === '/api/daily-bonus') return await dailyBonus(request, env);
     if (request.method === 'POST' && path === '/api/promo') return await activatePromo(request, env);
 
-    // ===== АДМИН =====
     if (path.startsWith('/api/admin/')) {
       if (!(await requireAdmin(env, request))) return json({ error: 'Нет прав админа' }, 403);
       if (path === '/api/admin/stats') return await adminStats(env);
       if (path === '/api/admin/users') return await adminUsers(env);
       if (path === '/api/admin/balance') return await adminBalance(request, env);
       if (path === '/api/admin/delete') return await adminDelete(request, env);
-            if (path === '/api/admin/promo-create') return await adminPromoCreate(request, env);
+      if (path === '/api/admin/promo-create') return await adminPromoCreate(request, env);
       if (path === '/api/admin/promos') return await adminPromos(env);
     }
 
@@ -55,7 +52,6 @@ async function handleApi(request, env, url) {
   }
 }
 
-// ===== РЕГИСТРАЦИЯ =====
 async function register(request, env) {
   const { nick, password, avatar } = await request.json();
   if (!nick || nick.length < 3) return json({ error: 'Ник минимум 3 символа' }, 400);
@@ -70,22 +66,19 @@ async function register(request, env) {
     "INSERT INTO users (nick, password_hash, avatar, balance, level, xp, role, inventory, boost_until) VALUES (?, ?, ?, 10.00, 1, 0, 'user', '[]', 0)"
   ).bind(nick, passwordHash, avatar || '😎').run();
 
-  const user = await fetchUser(env, nick);
-  return json({ success: true, user, token: await createSession(env, nick) }, 201);
+  return json({ success: true, user: await fetchUser(env, nick), token: await createSession(env, nick) }, 201);
 }
 
-// ===== ВХОД =====
 async function login(request, env) {
   const { nick, password } = await request.json();
   if (!nick || !password) return json({ error: 'Заполни все поля' }, 400);
 
-  // Админ — проверка на сервере
   if (nick.toLowerCase() === ADMIN_NICK) {
     if (password !== ADMIN_PASS) return json({ error: 'Неверный пароль' }, 401);
     const admin = {
-      nick: ADMIN_NICK, avatar: '👑', balance: 999999, level: 99, xp: 0,
-      role: 'admin', bets: 0, wins: 0, losses: 0, wagered: 0, profit: 0,
-      biggestWin: 0, achievements: [], streak: 0, inventory: [], boost_until: 0
+      nick: ADMIN_NICK, avatar: '👑', balance: 999999, level: 99, xp: 0, role: 'admin',
+      bets: 0, wins: 0, losses: 0, wagered: 0, profit: 0, biggestWin: 0,
+      achievements: [], streak: 0, inventory: [], boost_until: 0, last_bonus: 0
     };
     return json({ success: true, user: admin, token: await createSession(env, ADMIN_NICK) });
   }
@@ -112,21 +105,23 @@ async function requireAdmin(env, request) {
   return sess && sess.nick === ADMIN_NICK;
 }
 
-// ===== АДМИН ЭНДПОИНТЫ =====
 async function adminStats(env) {
   const u = await env.DB.prepare('SELECT COUNT(*) c FROM users').first();
   const a = await env.DB.prepare('SELECT SUM(bets) b, SUM(wagered) w, SUM(balance) bal FROM users').first();
   return json({ users: u.c, bets: a.b || 0, wagered: a.w || 0, balances: a.bal || 0 });
 }
+
 async function adminUsers(env) {
-  const rows = await env.DB.prepare('SELECT nick, balance, level, bets, role FROM users ORDER BY id DESC LIMIT 100').all();
+  const rows = await env.DB.prepare('SELECT nick, avatar, balance, level, bets, role FROM users ORDER BY id DESC LIMIT 100').all();
   return json({ users: rows.results });
 }
+
 async function adminBalance(request, env) {
   const { nick, balance } = await request.json();
   await env.DB.prepare('UPDATE users SET balance = ? WHERE nick = ?').bind(balance, nick).run();
   return json({ success: true });
 }
+
 async function adminDelete(request, env) {
   const { nick } = await request.json();
   if (nick === ADMIN_NICK) return json({ error: 'Нельзя удалить админа' }, 400);
@@ -134,7 +129,20 @@ async function adminDelete(request, env) {
   return json({ success: true });
 }
 
-// ===== ПОЛЬЗОВАТЕЛЬ =====
+async function adminPromoCreate(request, env) {
+  const { code, amount, max_uses } = await request.json();
+  const c = (code || '').trim().toUpperCase();
+  if (!c || !amount) return json({ error: 'Код и сумма обязательны' }, 400);
+  await env.DB.prepare('INSERT INTO promo_codes (code, amount, max_uses) VALUES (?, ?, ?) ON CONFLICT(code) DO UPDATE SET amount=?, max_uses=?')
+    .bind(c, amount, max_uses || 1, amount, max_uses || 1).run();
+  return json({ success: true });
+}
+
+async function adminPromos(env) {
+  const rows = await env.DB.prepare('SELECT * FROM promo_codes ORDER BY rowid DESC LIMIT 20').all();
+  return json({ promos: rows.results });
+}
+
 async function getUser(env, url) {
   const nick = url.searchParams.get('nick');
   if (!nick) return json({ error: 'Укажи ник' }, 400);
@@ -154,11 +162,10 @@ async function fetchUser(env, nick) {
     level: row.level, xp: row.xp, role: row.role,
     bets: row.bets, wins: row.wins, losses: row.losses,
     wagered: row.wagered, profit: row.profit, biggestWin: row.biggest_win,
-    achievements, inventory, boost_until: row.boost_until || 0
+    achievements, inventory, boost_until: row.boost_until || 0, last_bonus: row.last_bonus || 0
   };
 }
 
-// ===== МАГАЗИН =====
 async function buy(request, env) {
   const { nick, itemId } = await request.json();
   const item = CATALOG.find(i => i.id === itemId);
@@ -170,7 +177,6 @@ async function buy(request, env) {
 
   let inventory = [];
   try { inventory = JSON.parse(row.inventory || '[]'); } catch (e) {}
-
   if (item.type !== 'boost' && inventory.includes(item.id)) return json({ error: 'Уже куплено' }, 400);
 
   const newBalance = row.balance - item.price;
@@ -187,7 +193,6 @@ async function buy(request, env) {
   return json({ success: true, user: await fetchUser(env, nick) });
 }
 
-// ===== СТАТИСТИКА ИГР =====
 async function updateStats(request, env) {
   const { nick, bet, winAmount, cashoutMultiplier } = await request.json();
   if (!nick) return json({ error: 'Нет ника' }, 400);
@@ -208,6 +213,12 @@ async function updateStats(request, env) {
   const newBalance = user.balance + (winAmount - bet);
   const newXp = user.xp + (won ? 25 : 10) * boost;
   const newStreak = won ? (user.streak || 0) + 1 : 0;
+
+  if (won && (cashoutMultiplier || 0) >= 2) {
+    await env.DB.prepare('INSERT INTO feed (nick, mult, amount, created_at) VALUES (?,?,?,?)')
+      .bind(nick, cashoutMultiplier, winAmount, Date.now()).run();
+    await env.DB.prepare('DELETE FROM feed WHERE id NOT IN (SELECT id FROM feed ORDER BY id DESC LIMIT 50)').run();
+  }
 
   let achievements = [];
   try { achievements = JSON.parse(user.achievements || '[]'); } catch (e) {}
@@ -231,6 +242,51 @@ function checkAchievements(user, s) {
   if (s.newBalance >= 1000 && !has('whale')) n.push('whale');
   if (s.won && s.cashoutMultiplier <= 1.82 && s.cashoutMultiplier > 1 && !has('speedrun')) n.push('speedrun');
   return n;
+}
+
+async function leaderboard(env) {
+  const rows = await env.DB.prepare('SELECT nick, avatar, profit, wins, bets, level FROM users ORDER BY profit DESC LIMIT 20').all();
+  return json({ top: rows.results });
+}
+
+async function getFeed(env) {
+  const rows = await env.DB.prepare('SELECT * FROM feed ORDER BY id DESC LIMIT 10').all();
+  return json({ feed: rows.results });
+}
+
+async function dailyBonus(request, env) {
+  const { nick } = await request.json();
+  const row = await env.DB.prepare('SELECT * FROM users WHERE nick = ?').bind(nick).first();
+  if (!row) return json({ error: 'Не найден' }, 404);
+
+  const DAY = 24 * 60 * 60 * 1000;
+  const now = Date.now();
+  if (now - (row.last_bonus || 0) < DAY) {
+    const left = Math.ceil((DAY - (now - row.last_bonus)) / 60000);
+    return json({ error: 'Уже получено! Через ' + left + ' мин.' }, 400);
+  }
+
+  const amount = 5 * row.level;
+  await env.DB.prepare('UPDATE users SET balance = balance + ?, last_bonus = ? WHERE nick = ?').bind(amount, now, nick).run();
+  return json({ success: true, amount, user: await fetchUser(env, nick) });
+}
+
+async function activatePromo(request, env) {
+  const { nick, code } = await request.json();
+  const c = (code || '').trim().toUpperCase();
+  if (!c) return json({ error: 'Введи код' }, 400);
+
+  const row = await env.DB.prepare('SELECT * FROM promo_codes WHERE code = ?').bind(c).first();
+  if (!row) return json({ error: 'Код не найден' }, 404);
+  if (row.uses >= row.max_uses) return json({ error: 'Код исчерпан' }, 400);
+
+  const used = await env.DB.prepare('SELECT 1 FROM promo_used WHERE code = ? AND nick = ?').bind(c, nick).first();
+  if (used) return json({ error: 'Ты уже активировал этот код' }, 400);
+
+  await env.DB.prepare('INSERT INTO promo_used (code, nick) VALUES (?, ?)').bind(c, nick).run();
+  await env.DB.prepare('UPDATE promo_codes SET uses = uses + 1 WHERE code = ?').bind(c).run();
+  await env.DB.prepare('UPDATE users SET balance = balance + ? WHERE nick = ?').bind(row.amount, nick).run();
+  return json({ success: true, amount: row.amount, user: await fetchUser(env, nick) });
 }
 
 async function ping(request, env) {
