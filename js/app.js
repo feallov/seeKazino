@@ -61,13 +61,17 @@ const Store = {
   async refreshUser() {
     const nick = this.getNick();
     if (!nick) return null;
-    const data = await API.getUser(nick);
-    if (data.user) {
-      this.setUser(data.user);
-      updateBalanceDisplay();
-      updateAuthDisplay();
+    try {
+      const data = await API.getUser(nick);
+      if (data.user) {
+        this.setUser(data.user);
+        updateBalanceDisplay();
+        updateAuthDisplay();
+      }
+      return data.user;
+    } catch (e) {
+      return this.getUser();
     }
-    return data.user;
   }
 };
 
@@ -156,40 +160,4 @@ function initAuth() {
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const nick = document.getElementById('loginNick').value.trim();
-      const pass = document.getElementById('loginPass').value;
-      disableForm(loginForm, true);
-      const data = await API.login(nick, pass);
-      disableForm(loginForm, false);
-      if (!data.success) { showError(data.error || 'Ошибка входа'); return; }
-      Store.set
-
-// ===== NFT В ПРОФИЛЕ =====
-async function renderNFTs(inv) {
-  const grid = document.getElementById('nftGrid');
-  if (!grid) return;
-  const res = await fetch('/api/shop');
-  const data = await res.json();
-  const nfts = (data.items || []).filter(i => i.type === 'nft' && inv.includes(i.id));
-
-  if (!nfts.length) {
-    grid.innerHTML = '<p class="section-sub">Пока нет NFT — загляни в магазин! 🖼️</p>';
-    return;
-  }
-  grid.innerHTML = '';
-  nfts.forEach(n => {
-    const d = document.createElement('div');
-    d.className = 'nft-item rarity-' + n.rarity;
-    d.innerHTML = `<span class="nft-icon">${n.icon}</span><span class="nft-name">${n.name}</span>`;
-    grid.appendChild(d);
-  });
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  if (!document.getElementById('nftGrid')) return;
-  const draw = () => {
-    const user = Store.getUser();
-    if (user) renderNFTs(user.inventory || []);
-  };
-  draw();
-  setTimeout(draw, 800);
-});
+      const pass = document.getElementById('login
