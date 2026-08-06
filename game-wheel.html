@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>seeKazino — Wheel</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <a href="index.html" class="logo"><span class="logo-icon">🎰</span><span>see<span class="logo-accent">Kazino</span></span></a>
+            <div class="header-right">
+                <div class="balance-pill"><span class="balance-icon">💰</span><span id="balanceAmount">$10.00</span></div>
+                <a href="index.html" class="btn btn-ghost">← В лобби</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main game-layout">
+        <div class="crash-display">
+            <div class="wheel-wrap">
+                <div class="wheel-pointer">▼</div>
+                <canvas id="wheelCanvas" width="340" height="340"></canvas>
+            </div>
+            <div class="crash-status" id="wheelStatus">Крути колесо фортуны!</div>
+        </div>
+
+        <div class="crash-controls">
+            <div class="bet-section">
+                <label class="form-label">Ставка</label>
+                <div class="bet-input-group">
+                    <button class="bet-adjust" id="betMinus">−</button>
+                    <input type="number" class="form-input bet-input" id="betAmount" value="1.00" min="0.10" step="0.10">
+                    <button class="bet-adjust" id="betPlus">+</button>
+                </div>
+            </div>
+            <button class="btn btn-primary btn-full btn-large" id="wheelSpin">🎡 Крутить</button>
+        </div>
+    </main>
+
+    <script src="js/wheel.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
