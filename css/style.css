@@ -867,3 +867,29 @@ a { text-decoration: none; color: inherit; }
   .slot-reel { width: 72px; height: 88px; font-size: 34px; }
   .header-right .btn { padding: 5px 8px; font-size: 11px; }
 }
+
+/* ===== СЕКЦИИ МАГАЗИНА ===== */
+.shop-section { margin: 28px 0 12px; font-size: 18px; }
+.shop-card { position: relative; }
+
+/* ===== РЕДКОСТЬ NFT ===== */
+.rarity-common { border-color: #8B9099; }
+.rarity-rare { border-color: #60A5FA; }
+.rarity-epic { border-color: #A78BFA; }
+.rarity-legendary { border-color: #F59E0B; box-shadow: 0 0 18px rgba(245,158,11,.25); }
+.rarity-badge { position: absolute; top: 10px; left: 10px; font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 6px; }
+.rb-common { background: rgba(139,144,153,.2); color: #8B9099; }
+.rb-rare { background: rgba(96,165,250,.2); color: #60A5FA; }
+.rb-epic { background: rgba(167,139,250,.2); color: #A78BFA; }
+.rb-legendary { background: rgba(245,158,11,.2); color: #F59E0B; }
+
+/* ===== NFT В ПРОФИЛЕ ===== */
+.nft-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); gap: 12px; margin-top: 16px; }
+.nft-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; text-align: center; }
+.nft-icon { font-size: 34px; display: block; }
+.nft-name { font-size: 12px; color: var(--text-muted); margin-top: 6px; display: block; }
+
+/* ===== НОВЫЕ ТЕМЫ ===== */
+[data-theme="ice"] { --green: #1E40AF; --green-bright: #60A5FA; }
+[data-theme="sunset"] { --green: #9A3412; --green-bright: #FB923C; }
+[data-theme="matrix"] { --green: #14532D; --green-bright: #4ADE80; }
