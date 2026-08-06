@@ -101,7 +101,7 @@ function updateAuthDisplay() {
   }
 }
 
-const PROTECTED_PAGES = ['index.html', 'profile.html', 'game-crash.html', 'game-mines.html', 'game-slots.html', 'game-dice.html', 'game-roulette.html', 'game-plinko.html', 'game-blackjack.html', 'game-limbo.html', 'game-keno.html', 'game-wheel.html'];
+const PROTECTED_PAGES = ['index.html', 'profile.html', 'game-crash.html', 'game-mines.html', 'game-slots.html', 'game-dice.html', 'game-roulette.html', 'game-plinko.html', 'game-blackjack.html', 'game-limbo.html', 'game-keno.html', 'game-wheel.html', 'shop.html', 'admin.html'];
 
 document.addEventListener('DOMContentLoaded', async () => {
   const currentPage = window.location.pathname.split('/').pop() || 'index.html';
@@ -158,8 +158,9 @@ function initAuth() {
       const data = await API.login(nick, pass);
       disableForm(loginForm, false);
       if (!data.success) { showError(data.error || 'Ошибка входа'); return; }
-      Store.setNick(nick);
+            Store.setNick(nick);
       Store.setUser(data.user);
+      if (data.token) localStorage.setItem('seekazino_token', data.token);
       window.location.href = '/index.html';
     });
   }
@@ -176,6 +177,7 @@ function initAuth() {
       if (!data.success) { showError(data.error || 'Ошибка регистрации'); return; }
       Store.setNick(nick);
       Store.setUser(data.user);
+      if (data.token) localStorage.setItem('seekazino_token', data.token);
       window.location.href = '/index.html';
     });
   }
