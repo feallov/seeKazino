@@ -117,6 +117,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   updateAuthDisplay();
   initAuth();
   initProfile();
+
+  pingOnline();
+  setInterval(pingOnline, 30000);
 });
 
 function initAuth() {
