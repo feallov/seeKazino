@@ -13,6 +13,7 @@ async function handleApi(request, env, url) {
     if (request.method === 'POST' && path === '/api/login') return await login(request, env);
     if (request.method === 'GET' && path === '/api/user') return await getUser(env, url);
     if (request.method === 'POST' && path === '/api/update-stats') return await updateStats(request, env);
+    if (request.method === 'POST' && path === '/api/ping') return await ping(request, env);
     return json({ error: 'Не найдено' }, 404);
   } catch (e) {
     console.error(e);
