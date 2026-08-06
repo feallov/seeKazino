@@ -1,10 +1,9 @@
-// ===== CRASH GAME =====
-
 const CrashGame = {
   state: 'idle',
   multiplier: 1.00,
   crashPoint: 0,
   bet: 1.00,
+  cashoutMultiplier: 0,
   animationId: null,
   startTime: 0,
   canvas: null,
@@ -14,7 +13,6 @@ const CrashGame = {
   init() {
     this.canvas = document.getElementById('crashCanvas');
     this.ctx = this.canvas.getContext('2d');
-    
     this.resizeCanvas();
     window.addEventListener('resize', () => this.resizeCanvas());
 
@@ -26,11 +24,7 @@ const CrashGame = {
     document.querySelectorAll('.preset-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const val = btn.dataset.bet;
-        if (val === 'max') {
-          this.bet = Store.getBalance();
-        } else {
-          this.bet = parseFloat(val);
-        }
+        this.bet = val === 'max' ? Store.getBalance() : parseFloat(val);
         document.getElementById('betAmount').value = this.bet.toFixed(2);
       });
     });
@@ -65,19 +59,13 @@ const CrashGame = {
       this.setStatus('Сначала войди в аккаунт!', 'var(--red)');
       return;
     }
-
     const balance = Store.getBalance();
-    if (this.bet > balance) {
-      this.setStatus('Недостаточно средств!', 'var(--red)');
-      return;
-    }
-    if (this.bet < 0.10) {
-      this.setStatus('Минимальная ставка $0.10', 'var(--red)');
-      return;
-    }
+    if (this.bet > balance) { this.setStatus('Недостаточно средств!', 'var(--red)'); return; }
+    if (this.bet < 0.10) { this.setStatus('Минимальная ставка $0.10', 'var(--red)'); return; }
 
     this.state = 'running';
     this.multiplier = 1.00;
+    this.cashoutMultiplier = 0;
     this.crashPoint = this.generateCrashPoint();
     this.points = [];
     this.startTime = Date.now();
@@ -92,7 +80,6 @@ const CrashGame = {
 
   animate() {
     if (this.state !== 'running') return;
-
     const elapsed = (Date.now() - this.startTime) / 1000;
     this.multiplier = Math.pow(Math.E, elapsed * 0.3);
     this.multiplier = Math.round(this.multiplier * 100) / 100;
@@ -103,11 +90,7 @@ const CrashGame = {
     this.points.push(this.multiplier);
     this.drawGraph();
 
-    if (this.multiplier >= this.crashPoint) {
-      this.crash();
-      return;
-    }
-
+    if (this.multiplier >= this.crashPoint) { this.crash(); return; }
     this.animationId = requestAnimationFrame(() => this.animate());
   },
 
@@ -119,13 +102,11 @@ const CrashGame = {
     document.getElementById('crashMultiplier').style.color = 'var(--red)';
     this.setStatus('💥 Крах на ' + this.crashPoint.toFixed(2) + 'x', 'var(--red)');
 
-    // Отправляем на сервер (проигрыш: winAmount = 0)
     const user = Store.getUser();
     if (user) {
-      const data = await API.updateStats(user.nick, this.bet, 0);
+      const data = await API.updateStats(user.nick, this.bet, 0, 0);
       if (data.user) Store.setUser(data.user);
       updateBalanceDisplay();
-      initProfile();
     }
 
     this.addHistory(this.crashPoint, false);
@@ -134,24 +115,28 @@ const CrashGame = {
 
   async cashout() {
     if (this.state !== 'running') return;
-
     this.state = 'cashed';
     cancelAnimationFrame(this.animationId);
 
-    const winnings = this.bet * this.multiplier;
+    this.cashoutMultiplier = this.multiplier;
+    const winnings = this.bet * this.cashoutMultiplier;
 
     document.getElementById('crashMultiplier').style.color = 'var(--green-bright)';
-    this.setStatus('✅ Забрал $' + winnings.toFixed(2) + ' на ' + this.multiplier.toFixed(2) + 'x!', 'var(--green-bright)');
+    this.setStatus('✅ Забрал $' + winnings.toFixed(2) + ' на ' + this.cashoutMultiplier.toFixed(2) + 'x!', 'var(--green-bright)');
 
     const user = Store.getUser();
     if (user) {
-      const data = await API.updateStats(user.nick, this.bet, winnings);
+      const data = await API.updateStats(user.nick, this.bet, winnings, this.cashoutMultiplier);
       if (data.user) Store.setUser(data.user);
       updateBalanceDisplay();
-      initProfile();
+      
+      // Показываем ачивки
+      if (data.newAchievements && data.newAchievements.length > 0) {
+        data.newAchievements.forEach(achId => showAchievementToast(achId));
+      }
     }
 
-    this.addHistory(this.multiplier, true);
+    this.addHistory(this.cashoutMultiplier, true);
     setTimeout(() => this.reset(), 2500);
   },
 
@@ -159,6 +144,7 @@ const CrashGame = {
     this.state = 'idle';
     this.multiplier = 1.00;
     this.points = [];
+    this.cashoutMultiplier = 0;
 
     document.getElementById('crashMultiplier').textContent = '1.00x';
     document.getElementById('crashMultiplier').style.color = 'var(--text)';
@@ -180,35 +166,23 @@ const CrashGame = {
     item.className = 'history-item ' + (won ? 'history-green' : 'history-red');
     item.textContent = multiplier.toFixed(1) + 'x';
     container.insertBefore(item, container.firstChild);
-
-    while (container.children.length > 10) {
-      container.removeChild(container.lastChild);
-    }
+    while (container.children.length > 10) container.removeChild(container.lastChild);
   },
 
   drawIdle() {
-    const ctx = this.ctx;
-    const w = this.canvas.width;
-    const h = this.canvas.height;
+    const ctx = this.ctx, w = this.canvas.width, h = this.canvas.height;
     ctx.clearRect(0, 0, w, h);
-
     ctx.strokeStyle = '#2A2E35';
     ctx.lineWidth = 0.5;
     for (let i = 0; i < 5; i++) {
       const y = (h / 5) * i;
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(w, y);
-      ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
     }
   },
 
   drawGraph() {
-    const ctx = this.ctx;
-    const w = this.canvas.width;
-    const h = this.canvas.height;
+    const ctx = this.ctx, w = this.canvas.width, h = this.canvas.height;
     ctx.clearRect(0, 0, w, h);
-
     if (this.points.length < 2) return;
 
     const maxMult = Math.max(...this.points, 2);
@@ -222,10 +196,8 @@ const CrashGame = {
     this.points.forEach((mult, i) => {
       const x = i * step;
       const y = h - ((mult - 1) / (maxMult - 1)) * (h - 20);
-      if (i === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
     });
-
     ctx.stroke();
     ctx.shadowColor = this.state === 'crashed' ? '#EF4444' : '#22C55E';
     ctx.shadowBlur = 10;
@@ -234,6 +206,4 @@ const CrashGame = {
   }
 };
 
-document.addEventListener('DOMContentLoaded', () => {
-  CrashGame.init();
-});
+document.addEventListener('DOMContentLoaded', () => CrashGame.init());
