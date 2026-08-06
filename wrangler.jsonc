@@ -1,0 +1,10 @@
+{
+  "name": "seekazino",
+  "compatibility_date": "2025-04-01",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_id": "7d2cedd5-3cdd-47a0-9683-254113f70ea3"
+    }
+  ]
+}
