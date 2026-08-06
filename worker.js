@@ -2,14 +2,30 @@ const ADMIN_NICK = 'admin';
 const ADMIN_PASS = 'adadwe';
 
 const CATALOG = [
-  { id: 'av_dragon',  type: 'avatar', name: 'Дракон',       icon: '🐲', price: 50 },
-  { id: 'av_unicorn', type: 'avatar', name: 'Единорог',     icon: '🦄', price: 50 },
-  { id: 'av_alien',   type: 'avatar', name: 'Пришелец',     icon: '👽', price: 75 },
-  { id: 'av_money',   type: 'avatar', name: 'Магнат',       icon: '🤑', price: 100 },
-  { id: 'th_gold',    type: 'theme',  name: 'Золотая тема', icon: '👑', price: 200 },
-  { id: 'th_purple',  type: 'theme',  name: 'Неон',         icon: '🟣', price: 200 },
-  { id: 'th_crimson', type: 'theme',  name: 'Багровая',     icon: '🔴', price: 200 },
-  { id: 'bp_xp2',     type: 'boost',  name: 'XP x2 (24ч)',  icon: '⚡', price: 150 }
+  { id: 'av_dragon',  type: 'avatar', name: 'Дракон',   icon: '🐲', price: 50 },
+  { id: 'av_unicorn', type: 'avatar', name: 'Единорог', icon: '🦄', price: 50 },
+  { id: 'av_panda',   type: 'avatar', name: 'Панда',    icon: '🐼', price: 60 },
+  { id: 'av_clown',   type: 'avatar', name: 'Клоун',    icon: '🤡', price: 60 },
+  { id: 'av_alien',   type: 'avatar', name: 'Пришелец', icon: '👽', price: 75 },
+  { id: 'av_skull',   type: 'avatar', name: 'Скелет',   icon: '💀', price: 90 },
+  { id: 'av_money',   type: 'avatar', name: 'Магнат',   icon: '🤑', price: 100 },
+  { id: 'av_dino',    type: 'avatar', name: 'Дино',     icon: '🦖', price: 100 },
+
+  { id: 'th_gold',    type: 'theme', name: 'Золотая',  icon: '👑', price: 200 },
+  { id: 'th_purple',  type: 'theme', name: 'Неон',     icon: '🟣', price: 200 },
+  { id: 'th_crimson', type: 'theme', name: 'Багровая', icon: '🔴', price: 200 },
+  { id: 'th_ice',     type: 'theme', name: 'Лёд',      icon: '🧊', price: 200 },
+  { id: 'th_sunset',  type: 'theme', name: 'Закат',    icon: '🌅', price: 200 },
+  { id: 'th_matrix',  type: 'theme', name: 'Матрица',  icon: '🟩', price: 250 },
+
+  { id: 'bp_xp2', type: 'boost', name: 'XP x2 (24ч)', icon: '⚡', price: 150 },
+
+  { id: 'nft_doge',   type: 'nft', name: 'Doge',        icon: '🐶', price: 100,  rarity: 'common' },
+  { id: 'nft_pixel',  type: 'nft', name: 'Pixel Relic', icon: '👾', price: 250,  rarity: 'rare' },
+  { id: 'nft_cat',    type: 'nft', name: 'Crypto Cat',  icon: '🐱', price: 300,  rarity: 'rare' },
+  { id: 'nft_rocket', type: 'nft', name: 'Moon Ticket', icon: '🚀', price: 500,  rarity: 'epic' },
+  { id: 'nft_gem',    type: 'nft', name: 'Genesis Gem', icon: '💎', price: 600,  rarity: 'epic' },
+  { id: 'nft_ape',    type: 'nft', name: 'Bored Ape',   icon: '🦍', price: 1000, rarity: 'legendary' }
 ];
 
 export default {
@@ -73,7 +89,6 @@ async function login(request, env) {
   const { nick, password } = await request.json();
   if (!nick || !password) return json({ error: 'Заполни все поля' }, 400);
 
-  // АДМИН: при первом входе создаётся как настоящий игрок в базе
   if (nick.toLowerCase() === ADMIN_NICK) {
     let row = await env.DB.prepare('SELECT * FROM users WHERE nick = ?').bind(ADMIN_NICK).first();
     if (!row) {
@@ -188,8 +203,8 @@ async function buy(request, env) {
   let avatar = row.avatar;
   let boostUntil = row.boost_until || 0;
 
-  if (item.type === 'avatar') { avatar = item.icon; inventory.push(item.id); }
-  if (item.type === 'theme') inventory.push(item.id);
+  if (item.type !== 'boost') inventory.push(item.id);
+  if (item.type === 'avatar') avatar = item.icon;
   if (item.type === 'boost') boostUntil = Math.max(Date.now(), boostUntil) + 24 * 60 * 60 * 1000;
 
   await env.DB.prepare('UPDATE users SET balance=?, avatar=?, inventory=?, boost_until=? WHERE nick=?')
