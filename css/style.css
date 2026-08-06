@@ -742,3 +742,23 @@ a { text-decoration: none; color: inherit; }
 /* ===== WHEEL ===== */
 .wheel-wrap { position: relative; }
 .wheel-pointer { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); color: var(--green-bright); font-size: 20px; z-index: 2; }
+
+/* ===== SHOP ===== */
+.shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; margin-top: 24px; }
+.shop-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px; text-align: center; display: flex; flex-direction: column; gap: 8px; }
+.shop-owned { border-color: var(--green); }
+.shop-icon { font-size: 44px; }
+.shop-name { font-weight: 700; }
+.shop-type { font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
+
+/* ===== ADMIN ===== */
+.admin-table-wrap { overflow-x: auto; margin-top: 16px; }
+.admin-table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+.admin-table th, .admin-table td { padding: 12px 16px; text-align: left; font-size: 14px; border-bottom: 1px solid var(--border); }
+.admin-table th { color: var(--text-muted); font-size: 12px; text-transform: uppercase; }
+.admin-table .btn { padding: 4px 10px; font-size: 12px; margin-right: 4px; }
+
+/* ===== ТЕМЫ ===== */
+[data-theme="gold"] { --green: #92400E; --green-bright: #F59E0B; }
+[data-theme="purple"] { --green: #6D28D9; --green-bright: #A78BFA; }
+[data-theme="crimson"] { --green: #991B1B; --green-bright: #F87171; }
