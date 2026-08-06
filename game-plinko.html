@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>seeKazino — Plinko</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <a href="index.html" class="logo"><span class="logo-icon">🎰</span><span>see<span class="logo-accent">Kazino</span></span></a>
+            <div class="header-right">
+                <div class="balance-pill"><span class="balance-icon">💰</span><span id="balanceAmount">$10.00</span></div>
+                <a href="index.html" class="btn btn-ghost">← В лобби</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main game-layout">
+        <div class="crash-display">
+            <canvas id="plinkoCanvas" width="560" height="420"></canvas>
+            <div class="crash-status" id="plinkoStatus">Жми "Бросить" — шарик покатится! ⚪</div>
+        </div>
+
+        <div class="crash-controls">
+            <div class="bet-section">
+                <label class="form-label">Ставка</label>
+                <div class="bet-input-group">
+                    <button class="bet-adjust" id="betMinus">−</button>
+                    <input type="number" class="form-input bet-input" id="betAmount" value="1.00" min="0.10" step="0.10">
+                    <button class="bet-adjust" id="betPlus">+</button>
+                </div>
+                <div class="bet-presets">
+                    <button class="preset-btn" data-bet="0.50">$0.50</button>
+                    <button class="preset-btn" data-bet="1.00">$1</button>
+                    <button class="preset-btn" data-bet="2.50">$2.50</button>
+                    <button class="preset-btn" data-bet="5.00">$5</button>
+                    <button class="preset-btn" data-bet="max">MAX</button>
+                </div>
+            </div>
+
+            <button class="btn btn-primary btn-full btn-large" id="dropBtn">⚪ Бросить</button>
+        </div>
+    </main>
+
+    <script src="js/plinko.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
