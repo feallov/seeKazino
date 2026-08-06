@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>seeKazino — Blackjack</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-inner">
+            <a href="index.html" class="logo"><span class="logo-icon">🎰</span><span>see<span class="logo-accent">Kazino</span></span></a>
+            <div class="header-right">
+                <div class="balance-pill"><span class="balance-icon">💰</span><span id="balanceAmount">$10.00</span></div>
+                <a href="index.html" class="btn btn-ghost">← В лобби</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main game-layout">
+        <div class="crash-display">
+            <div class="bj-hand">
+                <div class="bj-label"> Дилер <span id="dealerScore"></span></div>
+                <div class="bj-cards" id="dealerCards"><div class="bj-placeholder">—</div></div>
+            </div>
+            <div class="bj-hand">
+                <div class="bj-label">🫵 Ты <span id="playerScore"></span></div>
+                <div class="bj-cards" id="playerCards"><div class="bj-placeholder">—</div></div>
+            </div>
+            <div class="crash-status" id="bjStatus">Сделай ставку и жми "Раздать"</div>
+        </div>
+
+        <div class="crash-controls">
+            <div class="bet-section">
+                <label class="form-label">Ставка</label>
+                <div class="bet-input-group">
+                    <button class="bet-adjust" id="betMinus">−</button>
+                    <input type="number" class="form-input bet-input" id="betAmount" value="1.00" min="0.10" step="0.10">
+                    <button class="bet-adjust" id="betPlus">+</button>
+                </div>
+            </div>
+
+            <button class="btn btn-primary btn-full btn-large" id="dealBtn">🃏 Раздать</button>
+            <button class="btn btn-ghost btn-full btn-large" id="hitBtn" style="display:none;">➕ Ещё карту</button>
+            <button class="btn btn-cashout btn-full btn-large" id="standBtn" style="display:none;">✋ Хватит</button>
+        </div>
+    </main>
+
+    <script src="js/blackjack.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
