@@ -37,8 +37,13 @@ const Store = {
     localStorage.removeItem('seekazino_token');
   },
   getUser() {
-    const data = localStorage.getItem('seekazino_user');
-    return data ? JSON.parse(data) : null;
+    try {
+      const data = localStorage.getItem('seekazino_user');
+      return data ? JSON.parse(data) : null;
+    } catch (e) {
+      localStorage.removeItem('seekazino_user');
+      return null;
+    }
   },
   setUser(user) { localStorage.setItem('seekazino_user', JSON.stringify(user)); },
   getBalance() {
@@ -56,7 +61,6 @@ const Store = {
   async refreshUser() {
     const nick = this.getNick();
     if (!nick) return null;
-    if (nick.toLowerCase() === 'admin') return this.getUser();
     const data = await API.getUser(nick);
     if (data.user) {
       this.setUser(data.user);
@@ -319,7 +323,7 @@ function injectHeaderLinks() {
     right.insertBefore(a, right.firstChild);
   }
   const user = Store.getUser();
-   if (user && (user.role === 'admin' || user.nick === 'admin') && !document.getElementById('adminLink')) {
+  if (user && (user.role === 'admin' || user.nick === 'admin') && !document.getElementById('adminLink')) {
     const a = document.createElement('a');
     a.href = '/admin.html'; a.className = 'btn btn-ghost'; a.id = 'adminLink'; a.textContent = '👑 Админ';
     right.insertBefore(a, right.firstChild);
