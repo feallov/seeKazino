@@ -703,3 +703,30 @@ a { text-decoration: none; color: inherit; }
 .paytable { margin-top: 24px; width: 100%; max-width: 420px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
 .paytable-title { font-size: 12px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
 .paytable-row { display: flex; justify-content: space-between; font-size: 14px; padding: 3px 0; }
+
+/* ===== DICE ===== */
+.dice-result { font-size: 64px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.dice-scale { position: relative; width: 100%; max-width: 420px; height: 12px; background: var(--border); border-radius: 6px; margin-top: 24px; }
+.dice-winzone { position: absolute; top: 0; height: 100%; background: var(--green-bright); border-radius: 6px; opacity: 0.7; }
+.dice-marker { position: absolute; top: -6px; width: 4px; height: 24px; background: #fff; border-radius: 2px; transform: translateX(-2px); }
+.dice-slider { width: 100%; accent-color: var(--green-bright); cursor: pointer; }
+
+/* ===== ROULETTE ===== */
+.roulette-number { width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 48px; font-weight: 800; background: var(--border); border: 4px solid var(--surface); }
+.roulette-number.red { background: #B91C1C; }
+.roulette-number.black { background: #111; }
+.roulette-number.green { background: var(--green); }
+.roulette-history { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 20px; max-width: 420px; justify-content: center; }
+.roulette-hist-item { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; }
+.roulette-hist-item.red { background: #B91C1C; }
+.roulette-hist-item.black { background: #111; }
+.roulette-hist-item.green { background: var(--green); }
+.roulette-bets { display: flex; flex-direction: column; gap: 8px; }
+.roulette-btn { padding: 12px; border-radius: 8px; border: 2px solid transparent; font-weight: 700; font-size: 13px; cursor: pointer; color: #fff; transition: all 0.2s; }
+.roulette-btn.red { background: #B91C1C; }
+.roulette-btn.green { background: var(--green); }
+.roulette-btn.black { background: #111; }
+.roulette-btn.selected { border-color: #fff; transform: scale(1.03); }
+
+/* градиент для Dice */
+.grad-dice { background: linear-gradient(135deg, #22303A 0%, #0B0D10 100%); }
