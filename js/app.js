@@ -348,3 +348,23 @@ function showCashbackToast(amount) {
   document.body.appendChild(t);
   setTimeout(() => t.remove(), 4000);
 }
+
+// ===== ЕДИНЫЕ СТАВКИ + БЛОКИРОВКА ВО ВРЕМЯ РАУНДА =====
+(function () {
+  const PRESETS = [
+    { label: '0.25', get: () => 0.25 },
+    { label: '0.5', get: () => 0.5 },
+    { label: '⅓', get: () => Store.getBalance() / 3 },
+    { label: '½', get: () => Store.getBalance() / 2 },
+    { label: 'MAX', get: () => Store.getBalance() }
+  ];
+  const START_IDS = ['startBtn', 'spinBtn', 'rollBtn', 'dropBtn', 'dealBtn', 'limboRollBtn', 'kenoPlay', 'wheelSpin'];
+
+  function controls() { return document.querySelectorAll('#betAmount, .bet-adjust, .bet-preset'); }
+
+  window.lockBet = function () {
+    controls().forEach(el => { el.disabled = true; });
+    const g = document.querySelector('.bet-input-group'); if (g) g.classList.add('bet-locked');
+  };
+  window.unlockBet = function () {
+    controls().forEach(el
