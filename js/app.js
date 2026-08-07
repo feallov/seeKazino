@@ -349,22 +349,22 @@ function showCashbackToast(amount) {
   setTimeout(() => t.remove(), 4000);
 }
 
-// ===== ЕДИНЫЕ СТАВКИ + БЛОКИРОВКА ВО ВРЕМЯ РАУНДА =====
-(function () {
-  const PRESETS = [
-    { label: '0.25', get: () => 0.25 },
-    { label: '0.5', get: () => 0.5 },
-    { label: '⅓', get: () => Store.getBalance() / 3 },
-    { label: '½', get: () => Store.getBalance() / 2 },
-    { label: 'MAX', get: () => Store.getBalance() }
-  ];
-  const START_IDS = ['startBtn', 'spinBtn', 'rollBtn', 'dropBtn', 'dealBtn', 'limboRollBtn', 'kenoPlay', 'wheelSpin'];
-
-  function controls() { return document.querySelectorAll('#betAmount, .bet-adjust, .bet-preset'); }
-
-  window.lockBet = function () {
-    controls().forEach(el => { el.disabled = true; });
-    const g = document.querySelector('.bet-input-group'); if (g) g.classList.add('bet-locked');
-  };
-  window.unlockBet = function () {
-    controls().forEach(el
+// ===== СТАВКИ: ПРЕСЕТЫ + БЛОКИРОВКА =====
+(function(){
+var P=[['0.25',function(){return .25}],['0.5',function(){return .5}],['⅓',function(){return Store.getBalance()/3}],['½',function(){return Store.getBalance()/2}],['MAX',function(){return Store.getBalance()}]];
+var S=['startBtn','spinBtn','rollBtn','dropBtn','dealBtn','limboRollBtn','kenoPlay','wheelSpin'];
+function ctl(){return document.querySelectorAll('#betAmount,.bet-adjust,.bet-preset')}
+window.lockBet=function(){ctl().forEach(function(e){e.disabled=true})};
+window.unlockBet=function(){ctl().forEach(function(e){e.disabled=false})};
+function set(v){var i=document.getElementById('betAmount');if(!i)return;v=Math.max(.1,Math.floor(v*100)/100);i.value=v.toFixed(2);i.dispatchEvent(new Event('change'))}
+document.addEventListener('DOMContentLoaded',function(){
+var i=document.getElementById('betAmount');if(!i)return;
+var r=document.querySelector('.bet-presets');
+if(!r){r=document.createElement('div');r.className='bet-presets';var g=document.querySelector('.bet-input-group');(g&&g.parentNode?g.parentNode:i.parentNode).insertBefore(r,g?g.nextSibling:null)}
+r.innerHTML='';
+P.forEach(function(p){var b=document.createElement('button');b.type='button';b.className='preset-btn bet-preset';b.textContent=p[0];b.onclick=function(){set(p[1]())};r.appendChild(b)});
+S.forEach(function(id){var b=document.getElementById(id);if(!b)return;b.addEventListener('click',function(){lockBet();setTimeout(function(){var run=b.disabled||b.offsetParent===null||(id==='kenoPlay'&&document.getElementById('kenoStatus')&&document.getElementById('kenoStatus').textContent.indexOf('Розыгрыш')===0);if(!run)unlockBet()},350)})});
+});
+var pu=API.updateStats.bind(API);
+API.updateStats=function(){return pu.apply(API,arguments).then(function(d){unlockBet();return d})};
+})();
