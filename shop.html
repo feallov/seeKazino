@@ -19,14 +19,21 @@
 
     <main class="main">
         <h1 class="section-title">🛒 Магазин</h1>
-        <p class="section-sub">Трать заработанное на аватары, темы и бусты</p>
+        <p class="section-sub">Трать заработанное на кейсы, аватары, темы и бусты</p>
 
         <div class="promo-block">
             <input type="text" class="form-input" id="promoInput" placeholder="ВВЕДИ ПРОМОКОД">
             <button class="btn btn-primary" id="promoBtn">Активировать</button>
         </div>
 
-        <div class="shop-grid" id="shopGrid"></div>
+        <div class="shop-tabs">
+            <button class="shop-tab active" data-cat="cases">🎁 Кейсы</button>
+            <button class="shop-tab" data-cat="avatars">😎 Аватары</button>
+            <button class="shop-tab" data-cat="themes">🎨 Темы</button>
+            <button class="shop-tab" data-cat="boosts">⚡ Бусты</button>
+        </div>
+
+        <div class="shop-grid-new" id="shopGrid"></div>
     </main>
 
     <script src="js/shop.js"></script>
