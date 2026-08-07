@@ -903,3 +903,19 @@ a { text-decoration: none; color: inherit; }
 .rarity-rare{border-color:#60A5FA}
 .rarity-epic{border-color:#A78BFA;box-shadow:0 0 12px rgba(167,139,250,.3)}
 .rarity-legendary{border-color:#F59E0B;box-shadow:0 0 18px rgba(245,158,11,.4)}
+
+/* ===== НОВЫЙ МАГАЗИН ===== */
+.shop-tabs{display:flex;gap:8px;margin:16px 0;flex-wrap:wrap}
+.shop-tab{padding:8px 18px;border-radius:999px;background:var(--surface);border:1px solid var(--border);cursor:pointer;font-size:13px;transition:all .2s;color:var(--text)}
+.shop-tab.active{background:var(--green);border-color:var(--green-bright);color:#fff}
+.shop-grid-new{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-top:12px}
+.shop-card-new{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;transition:all .25s;position:relative;overflow:hidden}
+.shop-card-new:hover{transform:translateY(-4px);border-color:var(--green-bright);box-shadow:0 8px 24px rgba(34,197,94,.15)}
+.shop-card-new .icon{font-size:44px;display:block;margin-bottom:8px}
+.shop-card-new .name{font-weight:600;font-size:14px;display:block;margin-bottom:4px}
+.shop-card-new .price{color:var(--green-bright);font-weight:700;font-size:15px}
+.case-banner{background:linear-gradient(135deg,var(--surface),rgba(34,197,94,.08));border:1px solid var(--green);border-radius:12px;padding:18px;text-align:center;cursor:pointer;transition:all .25s}
+.case-banner:hover{transform:scale(1.02);box-shadow:0 8px 24px rgba(34,197,94,.25)}
+.case-banner .case-icon{font-size:56px;display:block;margin-bottom:8px}
+.owned-badge{position:absolute;top:8px;right:8px;background:var(--green);color:#fff;font-size:10px;padding:2px 8px;border-radius:999px}
+@media(max-width:600px){.shop-grid-new{grid-template-columns:repeat(2,1fr)}}
