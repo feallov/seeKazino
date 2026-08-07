@@ -893,3 +893,13 @@ a { text-decoration: none; color: inherit; }
 [data-theme="ice"] { --green: #1E40AF; --green-bright: #60A5FA; }
 [data-theme="sunset"] { --green: #9A3412; --green-bright: #FB923C; }
 [data-theme="matrix"] { --green: #14532D; --green-bright: #4ADE80; }
+
+.nft-img{width:64px;height:64px;border-radius:10px;display:block;margin:0 auto}
+.nft-rarity{font-size:11px;display:block;margin-top:4px}
+.nft-acc{display:block;color:#F59E0B;font-weight:700;margin:6px 0;font-size:14px}
+.btn-sm{padding:4px 10px;font-size:11px;margin-top:4px}
+.rarity-common{border-color:#8B9099}
+.rarity-uncommon{border-color:#4ADE80}
+.rarity-rare{border-color:#60A5FA}
+.rarity-epic{border-color:#A78BFA;box-shadow:0 0 12px rgba(167,139,250,.3)}
+.rarity-legendary{border-color:#F59E0B;box-shadow:0 0 18px rgba(245,158,11,.4)}
