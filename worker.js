@@ -16,14 +16,43 @@ const CATALOG = [
   { id: 'th_ice',     type: 'theme', name: 'Лёд',      icon: '🧊', price: 200 },
   { id: 'th_sunset',  type: 'theme', name: 'Закат',    icon: '🌅', price: 200 },
   { id: 'th_matrix',  type: 'theme', name: 'Матрица',  icon: '🟩', price: 250 },
-  { id: 'bp_xp2', type: 'boost', name: 'XP x2 (24ч)', icon: '⚡', price: 150 },
-  { id: 'nft_doge',   type: 'nft', name: 'Doge',        icon: '🐶', price: 100,  rarity: 'common' },
-  { id: 'nft_pixel',  type: 'nft', name: 'Pixel Relic', icon: '👾', price: 250,  rarity: 'rare' },
-  { id: 'nft_cat',    type: 'nft', name: 'Crypto Cat',  icon: '🐱', price: 300,  rarity: 'rare' },
-  { id: 'nft_rocket', type: 'nft', name: 'Moon Ticket', icon: '🚀', price: 500,  rarity: 'epic' },
-  { id: 'nft_gem',    type: 'nft', name: 'Genesis Gem', icon: '💎', price: 600,  rarity: 'epic' },
-  { id: 'nft_ape',    type: 'nft', name: 'Bored Ape',   icon: '🦍', price: 1000, rarity: 'legendary' }
+  { id: 'bp_xp2', type: 'boost', name: 'XP x2 (24ч)', icon: '⚡', price: 150 }
 ];
+
+// РЕДКОСТЬ: rate = $/минуту. Если денег капает слишком много — меняй цифры здесь.
+const RARITY = {
+  common:    { rate: 1,   chance: 50, label: 'Обычный',     color: '#8B9099' },
+  uncommon:  { rate: 5,   chance: 27, label: 'Необычный',   color: '#4ADE80' },
+  rare:      { rate: 15,  chance: 15, label: 'Редкий',      color: '#60A5FA' },
+  epic:      { rate: 40,  chance: 6,  label: 'Эпический',   color: '#A78BFA' },
+  legendary: { rate: 100, chance: 2,  label: 'Легендарный', color: '#F59E0B' }
+};
+
+const CASES = [
+  { id: 'case_ice', name: 'Ледяной кейс', icon: '❄️', price: 100, colors: ['#0ea5e9', '#22d3ee'], nfts: [
+    { id: 'nft_ice1', name: 'Снежинка', rarity: 'common' }, { id: 'nft_ice2', name: 'Льдинка', rarity: 'uncommon' },
+    { id: 'nft_ice3', name: 'Морозный дух', rarity: 'rare' }, { id: 'nft_ice4', name: 'Кристальный голем', rarity: 'epic' },
+    { id: 'nft_ice5', name: 'Вечная мерзлота', rarity: 'legendary' } ] },
+  { id: 'case_dark', name: 'Чёрный кейс', icon: '🌑', price: 120, colors: ['#6b21a8', '#a855f7'], nfts: [
+    { id: 'nft_dark1', name: 'Мрак', rarity: 'common' }, { id: 'nft_dark2', name: 'Ночной зверь', rarity: 'uncommon' },
+    { id: 'nft_dark3', name: 'Тёмный рыцарь', rarity: 'rare' }, { id: 'nft_dark4', name: 'Пожиратель тьмы', rarity: 'epic' },
+    { id: 'nft_dark5', name: 'Чёрная сингулярность', rarity: 'legendary' } ] },
+  { id: 'case_fire', name: 'Огненный кейс', icon: '🔥', price: 150, colors: ['#dc2626', '#f97316'], nfts: [
+    { id: 'nft_fire1', name: 'Искра', rarity: 'common' }, { id: 'nft_fire2', name: 'Уголёк', rarity: 'uncommon' },
+    { id: 'nft_fire3', name: 'Огненный лис', rarity: 'rare' }, { id: 'nft_fire4', name: 'Лавовый голем', rarity: 'epic' },
+    { id: 'nft_fire5', name: 'Феникс', rarity: 'legendary' } ] },
+  { id: 'case_nature', name: 'Лесной кейс', icon: '🌿', price: 110, colors: ['#16a34a', '#84cc16'], nfts: [
+    { id: 'nft_nat1', name: 'Росток', rarity: 'common' }, { id: 'nft_nat2', name: 'Гриб', rarity: 'uncommon' },
+    { id: 'nft_nat3', name: 'Лесной волк', rarity: 'rare' }, { id: 'nft_nat4', name: 'Древний энт', rarity: 'epic' },
+    { id: 'nft_nat5', name: 'Дух природы', rarity: 'legendary' } ] },
+  { id: 'case_gold', name: 'Золотой кейс', icon: '👑', price: 200, colors: ['#b45309', '#f59e0b'], nfts: [
+    { id: 'nft_gold1', name: 'Монетка', rarity: 'common' }, { id: 'nft_gold2', name: 'Слиток', rarity: 'uncommon' },
+    { id: 'nft_gold3', name: 'Золотой жук', rarity: 'rare' }, { id: 'nft_gold4', name: 'Корона', rarity: 'epic' },
+    { id: 'nft_gold5', name: 'Золотой дракон', rarity: 'legendary' } ] }
+];
+
+const NFT_BY_ID = {};
+CASES.forEach(c => c.nfts.forEach(n => { NFT_BY_ID[n.id] = { ...n, colors: c.colors, rate: RARITY[n.rarity].rate }; }));
 
 export default {
   async fetch(request, env) {
