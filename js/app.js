@@ -325,3 +325,26 @@ document.addEventListener('DOMContentLoaded', () => {
   draw();
   setTimeout(draw, 800);
 });
+
+// ===== ФИКС: повторы запроса + тост кешбека =====
+(function () {
+  const orig = API.updateStats.bind(API);
+  API.updateStats = async function (nick, bet, winAmount, cashoutMultiplier) {
+    let data = null;
+    for (let i = 0; i < 3; i++) {
+      try { data = await orig(nick, bet, winAmount, cashoutMultiplier); break; }
+      catch (e) { if (i < 2) await new Promise(r => setTimeout(r, 700)); }
+    }
+    if (!data) return { error: 'Сервер недоступен' };
+    if (data.cashback > 0) showCashbackToast(data.cashback);
+    return data;
+  };
+})();
+
+function showCashbackToast(amount) {
+  const t = document.createElement('div');
+  t.style.cssText = 'position:fixed;top:80px;right:20px;z-index:1000;background:linear-gradient(135deg,#92400E,#F59E0B);color:#fff;padding:14px 18px;border-radius:12px;box-shadow:0 8px 32px rgba(245,158,11,.3);';
+  t.innerHTML = '<div style="display:flex;align-items:center;gap:10px;"><span style="font-size:26px;">💸</span><div><div style="font-size:11px;opacity:.85;text-transform:uppercase;">Кешбек</div><div style="font-weight:700;">+$' + Number(amount).toFixed(2) + '</div></div></div>';
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 4000);
+}
