@@ -48,3 +48,19 @@ document.addEventListener('DOMContentLoaded',function(){
   renderNFTs();
   setInterval(renderNFTs,15000);
 });
+window.NFT_BY_ID={};
+async function loadNFTMeta(){
+  if(Object.keys(NFT_BY_ID).length)return;
+  var r=await fetch('/api/shop');
+  var d=await r.json();
+  (d.cases||[]).forEach(function(c){
+    c.nfts.forEach(function(n){
+      NFT_BY_ID[n.id]={id:n.id,name:n.name,rarity:n.rarity,rate:NFT_RATE[n.rarity],colors:c.colors};
+    });
+  });
+}
+
+(function(){
+  var oldInit=renderNFTs;
+  window.renderNFTs=async function(){await loadNFTMeta();return oldInit()};
+})();
